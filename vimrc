@@ -45,7 +45,7 @@ set laststatus=2          " last window always has a statusline
 set incsearch             " But do highlight as you type your search.
 set ignorecase            " Make searches case-insensitive.
 set ruler                 " Always show info along bottom.
-set showmatch
+set showmatch             " Highlight matching brackets
 set statusline=%<%f\%h%m%r%=%-20.(line=%l\ \ col=%c%V\ \ linecount=%L%)\ \ \%h%m%r%=%-40(bytval=0x%B,%n%Y%)\%P
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -59,3 +59,11 @@ set shiftround            " always indent/outdent to the nearest tabstop
 set expandtab             " use spaces instead of tabs
 "set smarttab              " use tabs at the start of a line, spaces elsewhere
 "set nowrap                " don't wrap text
+
+
+set backspace=eol,start,indent
+set whichwrap+=<,>,h,l
+
+" Treat long lines as break lines
+map j gj
+map k gk
