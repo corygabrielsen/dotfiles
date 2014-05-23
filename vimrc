@@ -32,8 +32,14 @@ autocmd Syntax json sou ~/.vim/syntax/json.vim
 "match OverLength /\%81v.\+/
 
 " Draw black vertical line at column 80
-set cc=80
-highlight ColorColumn ctermbg=black guibg=black
+if exists('+colorcolumn')
+    set colorcolumn=80
+    highlight ColorColumn ctermbg=black guibg=black
+elseif exists('matchadd')
+    au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%>80v.\+', -1)
+else
+    "todo
+endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " 04. Vim UI                                                                 "
