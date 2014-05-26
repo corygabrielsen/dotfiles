@@ -48,7 +48,7 @@ ZSH_THEME="stoooops"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=( ) 
+plugins=( git  gitfast ) 
 
 source $ZSH/oh-my-zsh.sh
 
@@ -72,3 +72,5 @@ export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # ssh
 # export SSH_KEY_PATH="~/.ssh/dsa_id"
+
+function gfind () find -exec grep -Hn $1 {} \;
