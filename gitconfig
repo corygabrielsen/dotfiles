@@ -1,0 +1,35 @@
+[alias]
+    c = commit
+    ca = commit -a
+    cm = commit -m
+    cam = commit -am
+
+    d = diff
+    
+    f = fetch
+
+    lg = log --oneline --graph --decorate
+
+    s = status
+    sb = status -sb
+
+[color]
+    ui = auto
+
+[color "status"]
+    added = green
+    changed = red
+    untracked = cyan
+
+[diff]
+    tool = vimdiff
+
+[include]
+    # For username / creds /etc.
+    path = ~/.gitconfig.local
+
+[merge]
+    tool = vimdiff
+
+[push]
+	default = simple
