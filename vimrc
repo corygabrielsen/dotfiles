@@ -73,3 +73,8 @@ set whichwrap+=<,>,h,l
 " Treat long lines as break lines
 map j gj
 map k gk
+
+" remap jj to escape in insert mode
+inoremap jj <Esc>
+nnoremap JJJJ <Nop>
+
