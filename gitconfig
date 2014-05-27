@@ -18,7 +18,7 @@
 
 [color "status"]
     added = green
-    changed = red
+    changed = yellow
     untracked = cyan
 
 [credential]                                                                                     
@@ -33,6 +33,3 @@
 
 [merge]
     tool = vimdiff
-
-[push]
-	default = simple
