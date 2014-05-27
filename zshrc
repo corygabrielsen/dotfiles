@@ -59,6 +59,11 @@ if [ -f ~/.aliases ]; then
   source ~/.aliases
 fi
 
+# Read local zshrc, if present
+if [ -f ~/.zshrc.local ]; then
+  source ~/.zshrc.local
+fi
+
 export PATH=$HOME/bin:/usr/local/bin:$PATH
 # export MANPATH="/usr/local/man:$MANPATH"
 

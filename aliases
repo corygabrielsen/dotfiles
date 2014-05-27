@@ -6,3 +6,8 @@ alias gl="git log"
 alias glg="git log --graph --oneline --decorate"
 alias gs="git status"
 alias gsb="git status -sb"
+
+
+if [ -f ~/.aliases.local ]; then
+  source ~/.aliases.local
+fi
