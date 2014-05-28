@@ -1,5 +1,15 @@
 ##############################
-# git aliases
+# UNIX commands
+##############################
+alias ls='ls -h --color=auto'                                                                                                    
+alias ll='ls -lv'
+ 
+alias cp='cp -i'
+alias mv='mv -i'
+alias rm='rm -i'
+
+##############################
+# Git
 ##############################
 alias g="git"
 
