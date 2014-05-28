@@ -1,8 +1,6 @@
-h
-# This script creates symlinks from the home directory to any desired dotfiles in ~/dotfiles
-############################
 
-########## Variables
+# This script creates symlinks from the home directory to any desired dotfiles in ~/dotfiles
+################################################
 
 dir=~/dotfiles                    # dotfiles directory
 olddir=~/dotfiles_old             # old dotfiles backup directory
@@ -21,14 +19,15 @@ cd $dir
 echo "done"
 
 # move any existing dotfiles in homedir to dotfiles_old directory, then create symlinks from the homedir to any files in the ~/dotfiles directory specified in $files
+echo "Moving any existing dotfiles from ~ to $olddir"
 for file in $files; do
-  echo "Moving any existing dotfiles from ~ to $olddir"
+  echo "Moving old $file to $olddir"
   mv ~/.$file ~/dotfiles_old/
   echo "Creating symlink to $file in home directory."
   ln -s $dir/$file ~/.$file
 done
 
-install_zsh () {
+install_zsh() {
   # Test to see if zshell is installed.  If it is:
   if [ -f /bin/zsh -o -f /usr/bin/zsh ]; then
     # Clone my oh-my-zsh repository from GitHub only if it isn't already present
@@ -55,6 +54,3 @@ install_zsh () {
 }
 
 install_zsh
-
-
-
