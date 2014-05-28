@@ -4,13 +4,20 @@
     cm = commit -m
     cam = commit -am
 
+    cp = cherry-pick
+
     d = diff
-    
+
     f = fetch
 
-    lg = log --oneline --graph --decorate
+    l = log --pretty=format:"%C(yellow)%h%C(auto)%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
+    ld = log --pretty=format:"%C(yellow)%h\\ %C(magenta)%ad%C(auto)%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
+    lg = log --pretty=format:"%C(yellow)%h%C(auto)%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --graph
+    lgd = log --pretty=format:"%C(yellow)%h\\ %C(magenta)%ad%C(auto)%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --graph --date=short
+    ll = log --pretty=format:"%C(yellow)%h%C(auto)%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+    lld = log --pretty=format:"%C(yellow)%h\\ %C(magenta)%ad%C(auto)%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat --date=short
 
-    s = status
+    st = status
     sb = status -sb
 
 [color]
@@ -21,14 +28,14 @@
     changed = yellow
     untracked = cyan
 
-[credential]                                                                                     
+[credential]
     helper = cache --timeout 3600
 
 [diff]
     tool = vimdiff
 
 [include]
-    # For username / creds /etc.
+    # For username / creds / backwards-compatability / etc.
     path = ~/.gitconfig.local
 
 [merge]
