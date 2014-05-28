@@ -1,9 +1,11 @@
 alias g="git"
 alias gb="git branch"
 alias gc="git commit"
+alias gcm="git commit -m"
 alias gd="git diff"
 alias gl="git log"
 alias glg="git log --graph --oneline --decorate"
+alias gpl="git pull"
 alias gs="git status"
 alias gsb="git status -sb"
 
