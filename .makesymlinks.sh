@@ -2,7 +2,7 @@
 # This script creates symlinks from the home directory to any desired dotfiles in ~/dotfiles
 ################################################
 
-dir=~/dotfiles                    # dotfiles directory
+dir=~/dev/dotfiles                    # dotfiles directory
 olddir=~/dotfiles_old             # old dotfiles backup directory
 files="aliases gitconfig oh-my-zsh vimrc vim zshrc"    # list of files/folders to symlink in homedir
 
