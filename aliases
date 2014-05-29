@@ -34,6 +34,8 @@ alias gls="git ls"
 
 alias gpl="git pl"
 
+alias gpu="git pu"
+
 alias gst="git st"
 alias gsb="git sb"
 
