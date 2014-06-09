@@ -1,8 +1,14 @@
 [alias]
+    a = add
+
+    b = branch
+
     c = commit
     ca = commit -a
     cm = commit -m
     cam = commit -am
+
+    co = checkout
 
     cp = cherry-pick
 

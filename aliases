@@ -13,12 +13,16 @@ alias rm='rm -i'
 ##############################
 alias g="git"
 
+alias ga="git a"
+
 alias gb="git b"
 
 alias gc="git c"
 alias gca="git ca"
 alias gcm="git cm"
 alias gcam="git cam"
+
+alias gco="git co"
 
 alias gcp="git cp"
 
