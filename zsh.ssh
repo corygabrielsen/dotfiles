@@ -13,17 +13,17 @@ function printtableborderrow() {
 }
 
 function printtableheaderrow() {
-  printrow "" "  Free    Used    Total"
-  printrow "" "--------------------------"
+  printrow "" "  Free     Used     Total"
+  printrow "" "----------------------------"
 }
 
 function printtablerowint() {
-  value=`printf " %05s%s | %04s%s | %05s%s " $2 $5 $3 $5 $4 $5`
+  value=`printf " %05s%s    %04s%s    %05s%s " $2 $5 $3 $5 $4 $5`
   printrow $1 $value
 }
 
 function printtablerowfloat() {
-  value=`printf " %5.1f%s | %4.1f%s | %5.1f%s " $2 $5 $3 $5 $4 $5`
+  value=`printf " %5.1f%s    %4.1f%s    %5.1f%s " $2 $5 $3 $5 $4 $5`
   printrow $1 $value
 }
 
@@ -59,51 +59,83 @@ function welcomestats() {
   let days=$((${upSeconds}/86400))
   STOOOOPS_UPTIME=`printf "%d days, %02d:%02d:%02d" "$days" "$hours" "$mins" "$secs"`
 
+  #################################
+  ## Info
+  #################################
   STOOOOPS_USER=`whoami`
   STOOOOPS_HOST=`hostname`
 
+  #################################
+  ## Date/Time
+  #################################
   STOOOOPS_DATE=`date +"%Y-%m-%e"`
   STOOOOPS_TIME=`date +"%R (%:z)"`
 
+  #################################
+  ## OS/Arch
+  #################################
   STOOOOPS_KERNEL=`uname -sr`
   STOOOOPS_ARCHITECTURE=`uname -m`
   STOOOOPS_OS=`uname -o`
 
+  #################################
+  ## Load Averages
+  #################################
   # get the load averages
   read STOOOOPS_LOAD_1 STOOOOPS_LOAD_5 STOOOOPS_LOAD_15 rest < /proc/loadavg
 
+  #################################
+  ## NetworkOB
+  #################################
   STOOOOPS_NETWORK_LOCAL_IP_WLAN0=`localip wlan0`
   STOOOOPS_NETWORK_LOCAL_IP_ETH0=`localip eth0`
   STOOOOPS_NETWORK_PUBLIC_IP=`curl -s icanhazip.com`
-
+  
+  #################################
+  ## Memory
+  #################################
   STOOOOPS_MEMORY_FREE_KB=`cat /proc/meminfo | grep MemFree | awk {'print $2'}`
   STOOOOPS_MEMORY_TOTAL_KB=`cat /proc/meminfo | grep MemTotal | awk {'print $2'}`
-  STOOOOPS_MEMORY_USED_KB=`expr $STOOOOPS_MEMORY_TOTAL_KB - $STOOOOPS_MEMORY_FREE_KB`
-  STOOOOPS_MEMORY_FREE_M=`expr $STOOOOPS_MEMORY_FREE_KB / 1000`
-  STOOOOPS_MEMORY_TOTAL_M=`expr $STOOOOPS_MEMORY_TOTAL_KB / 1000`
-  STOOOOPS_MEMORY_USED_M=`expr $STOOOOPS_MEMORY_USED_KB / 1000`
+  STOOOOPS_MEMORY_USED_KB=$(($STOOOOPS_MEMORY_TOTAL_KB - $STOOOOPS_MEMORY_FREE_KB))
+  STOOOOPS_MEMORY_FREE_M=$(($STOOOOPS_MEMORY_FREE_KB / 1000))
+  STOOOOPS_MEMORY_TOTAL_M=$(($STOOOOPS_MEMORY_TOTAL_KB / 1000))
+  STOOOOPS_MEMORY_USED_M=$(($STOOOOPS_MEMORY_USED_KB / 1000))
 
+  #################################
+  ## Swap
+  #################################
   read ignoretoken STOOOOPS_SWAP_TOTAL_KB STOOOOPS_SWAP_USED_KB STOOOOPS_SWAP_FREE_KB < \
       <(free -k | tail -n 1)
   read ignoretoken STOOOOPS_SWAP_TOTAL_M STOOOOPS_SWAP_USED_M STOOOOPS_SWAP_FREE_M < \
       <(free -m | tail -n 1)
 
+  #################################
+  ## Memory
+  #################################
   STOOOOPS_DISK_USED_K=`df / | awk '{ a = $3 } END { print a }'`
   STOOOOPS_DISK_TOTAL_K=`df / | awk '{ a = $4 } END { print a }'`
-  STOOOOPS_DISK_FREE_K=`expr $STOOOOPS_DISK_TOTAL_K - $STOOOOPS_DISK_USED_K`
-  STOOOOPS_DISK_FREE_M=`expr $STOOOOPS_DISK_FREE_K / 1024`
-  STOOOOPS_DISK_TOTAL_M=`expr $STOOOOPS_DISK_TOTAL_K / 1024`
-  STOOOOPS_DISK_USED_M=`expr $STOOOOPS_DISK_USED_K / 1024`
-  STOOOOPS_DISK_FREE_G=`printf "%3.1f" $(bc <<< "1.0 + 1.0")`
-  #$STOOOOPS_DISK_FREE_M / 1024.0)`
-  STOOOOPS_DISK_TOTAL_G=`echo $((1.0 * $STOOOOPS_DISK_TOTAL_M / 1024.0))`
-  STOOOOPS_DISK_USED_G=`echo $((1.0 * $STOOOOPS_DISK_USED_M / 1024.0))`
+  STOOOOPS_DISK_FREE_K=$(($STOOOOPS_DISK_TOTAL_K - $STOOOOPS_DISK_USED_K))
+  STOOOOPS_DISK_FREE_M=$(($STOOOOPS_DISK_FREE_K / 1024))
+  STOOOOPS_DISK_TOTAL_M=$(($STOOOOPS_DISK_TOTAL_K / 1024))
+  STOOOOPS_DISK_USED_M=$(($STOOOOPS_DISK_USED_K / 1024))
+  STOOOOPS_DISK_FREE_G=$((1.0 * $STOOOOPS_DISK_FREE_M / 1024.0))
+  STOOOOPS_DISK_TOTAL_G=$((1.0 * $STOOOOPS_DISK_TOTAL_M / 1024.0))
+  STOOOOPS_DISK_USED_G=$((1.0 * $STOOOOPS_DISK_USED_M / 1024.0))
 
+  #################################
+  ## Processes
+  #################################
   STOOOOPS_PROCESSES_RUNNING=`ps ax | wc -l | tr -d " "`
 
+  #################################
+  ## Weather
+  #################################
   STOOOOPS_WEATHER_URL="http://www.accuweather.com/en/us/seattle-wa/98104/weather-forecast/351409"
   STOOOOPS_WEATHER=`wget -q -O- $STOOOOPS_WEATHER_URL | awk -F\' '/acm_RecentLocationsCarousel\.push/{print $12"°F "$16}' | head -n 1`
 
+  #################################
+  ## Table
+  #################################
   printborderrow
   printemptyrow
 
