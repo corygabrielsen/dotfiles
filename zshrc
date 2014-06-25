@@ -79,4 +79,4 @@ export EDITOR='vim'
 # export SSH_KEY_PATH="~/.ssh/dsa_id"
 
 # Define custom functions
-function gfind () find -exec grep -Hn $1 {} \;
+function gfind () find $2 -type f -exec grep -Hn $1 {} \;
