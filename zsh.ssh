@@ -1,8 +1,11 @@
 function printrow() {
-  start="|  "
-  line="...................:"
-  end="                                                       |"
-  printf "%s%s%s %s%s\n" $start $1 "${line:${#1}}" $2 "${end:${#2}}"
+  if [ ${#1} -ne 0 ]; then
+    dotline=`for i in {${#1}..19}; do printf "."; done`
+  else
+    dotline="                    "
+  fi
+  endspaces=`for i in {${#2}..54}; do printf " "; done`
+  printf "|  %s%s %s%s|\n" "$1" $dotline "$2" $endspaces
 }
 
 function printtableborderrow() {
@@ -10,9 +13,8 @@ function printtableborderrow() {
 }
 
 function printtableheaderrow() {
-  key="                    "
-  printrow $key "  Free    Used    Total"
-  printrow $key "--------------------------"
+  printrow "" "  Free    Used    Total"
+  printrow "" "--------------------------"
 }
 
 function printtablerowint() {
@@ -37,14 +39,16 @@ function printborderrow() {
   printf "--------------------------------------------------------------------------------\n"
 }
 
-function getlocalip() {
-  ip=`/sbin/ifconfig $1 | /bin/grep "inet addr" | /usr/bin/cut -d ":" -f 2 | /usr/bin/cut -d " " -f 1`
-  if test -n "$ip"
-  then
-    echo $ip
-  else
-    echo "N/A"
+function localip() {
+  header=`/sbin/ifconfig | grep $1`
+  if [ ${#header} -ne 0 ]; then
+    ip=`/sbin/ifconfig $1 | /bin/grep "inet addr" | /usr/bin/cut -d ":" -f 2 | /usr/bin/cut -d " " -f 1`
   fi
+    if test -n "$ip"; then
+      echo $ip
+    else
+      echo "N/A"
+    fi
 }
 
 function welcomestats() {
@@ -68,29 +72,30 @@ function welcomestats() {
   # get the load averages
   read STOOOOPS_LOAD_1 STOOOOPS_LOAD_5 STOOOOPS_LOAD_15 rest < /proc/loadavg
 
-  STOOOOPS_NETWORK_LOCAL_IP_WLAN0=`getlocalip wlan0`
-  STOOOOPS_NETWORK_LOCAL_IP_ETH0=`getlocalip eth0`
+  STOOOOPS_NETWORK_LOCAL_IP_WLAN0=`localip wlan0`
+  STOOOOPS_NETWORK_LOCAL_IP_ETH0=`localip eth0`
   STOOOOPS_NETWORK_PUBLIC_IP=`curl -s icanhazip.com`
 
   STOOOOPS_MEMORY_FREE_KB=`cat /proc/meminfo | grep MemFree | awk {'print $2'}`
   STOOOOPS_MEMORY_TOTAL_KB=`cat /proc/meminfo | grep MemTotal | awk {'print $2'}`
   STOOOOPS_MEMORY_USED_KB=`expr $STOOOOPS_MEMORY_TOTAL_KB - $STOOOOPS_MEMORY_FREE_KB`
-  STOOOOPS_MEMORY_FREE_MB=`expr $STOOOOPS_MEMORY_FREE_KB / 1000`
-  STOOOOPS_MEMORY_TOTAL_MB=`expr $STOOOOPS_MEMORY_TOTAL_KB / 1000`
-  STOOOOPS_MEMORY_USED_MB=`expr $STOOOOPS_MEMORY_USED_KB / 1000`
+  STOOOOPS_MEMORY_FREE_M=`expr $STOOOOPS_MEMORY_FREE_KB / 1000`
+  STOOOOPS_MEMORY_TOTAL_M=`expr $STOOOOPS_MEMORY_TOTAL_KB / 1000`
+  STOOOOPS_MEMORY_USED_M=`expr $STOOOOPS_MEMORY_USED_KB / 1000`
 
   read ignoretoken STOOOOPS_SWAP_TOTAL_KB STOOOOPS_SWAP_USED_KB STOOOOPS_SWAP_FREE_KB < \
       <(free -k | tail -n 1)
-  read ignoretoken STOOOOPS_SWAP_TOTAL_MB STOOOOPS_SWAP_USED_MB STOOOOPS_SWAP_FREE_MB < \
+  read ignoretoken STOOOOPS_SWAP_TOTAL_M STOOOOPS_SWAP_USED_M STOOOOPS_SWAP_FREE_M < \
       <(free -m | tail -n 1)
 
   STOOOOPS_DISK_USED_K=`df / | awk '{ a = $3 } END { print a }'`
   STOOOOPS_DISK_TOTAL_K=`df / | awk '{ a = $4 } END { print a }'`
-  STOOOOPS_DISK_FREE_K=`expr $STOOOOPS_DISK_TOTAL_K - $STOOOOPS_DISK_USED_KB`
+  STOOOOPS_DISK_FREE_K=`expr $STOOOOPS_DISK_TOTAL_K - $STOOOOPS_DISK_USED_K`
   STOOOOPS_DISK_FREE_M=`expr $STOOOOPS_DISK_FREE_K / 1024`
   STOOOOPS_DISK_TOTAL_M=`expr $STOOOOPS_DISK_TOTAL_K / 1024`
   STOOOOPS_DISK_USED_M=`expr $STOOOOPS_DISK_USED_K / 1024`
-  STOOOOPS_DISK_FREE_G=`echo $((1.0 * $STOOOOPS_DISK_FREE_M / 1024.0))`
+  STOOOOPS_DISK_FREE_G=`printf "%3.1f" $(bc <<< "1.0 + 1.0")`
+  #$STOOOOPS_DISK_FREE_M / 1024.0)`
   STOOOOPS_DISK_TOTAL_G=`echo $((1.0 * $STOOOOPS_DISK_TOTAL_M / 1024.0))`
   STOOOOPS_DISK_USED_G=`echo $((1.0 * $STOOOOPS_DISK_USED_M / 1024.0))`
 
@@ -125,9 +130,9 @@ function welcomestats() {
 
   printtableborderrow
   printtableheaderrow
-  printtablerowint "Memory" $STOOOOPS_MEMORY_FREE_MB $STOOOOPS_MEMORY_USED_MB $STOOOOPS_MEMORY_TOTAL_MB "M"
+  printtablerowint "Memory" $STOOOOPS_MEMORY_FREE_M $STOOOOPS_MEMORY_USED_M $STOOOOPS_MEMORY_TOTAL_M "M"
   printtablerowseparator
-  printtablerowint "Swap" $STOOOOPS_SWAP_FREE_MB $STOOOOPS_SWAP_USED_MB $STOOOOPS_SWAP_TOTAL_MB "M"
+  printtablerowint "Swap" $STOOOOPS_SWAP_FREE_M $STOOOOPS_SWAP_USED_M $STOOOOPS_SWAP_TOTAL_M "M"
   printtablerowseparator
   printtablerowfloat "Disk" $STOOOOPS_DISK_FREE_G $STOOOOPS_DISK_USED_G $STOOOOPS_DISK_TOTAL_G "G"
   printtableborderrow
@@ -149,7 +154,4 @@ function welcomestats() {
 
 
 welcomestats
-#  echo $(tput setaf 2)
-#
-#echo "|  Load Averages......: ${STOOOOPS_LOAD_1}, ${STOOOOPS_LOAD_5}, ${STOOOOPS_LOAD_15} (1, 5, 15 min)"
-#
+
