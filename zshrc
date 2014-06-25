@@ -18,6 +18,11 @@ if [ -f ~/.zsh.functions ]; then
   source ~/.zsh.functions
 fi
 
+# Read ssh script
+if [ -f ~/.zsh.ssh ]; then
+  source ~/.zsh.ssh
+fi
+
 # Read local zshrc, if present
 if [ -f ~/.zshrc.local ]; then
   source ~/.zshrc.local
