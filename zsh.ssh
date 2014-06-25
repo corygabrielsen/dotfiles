@@ -1,8 +1,32 @@
-function printtablerow() {
+function printrow() {
   start="|  "
   line="...................:"
   end="                                                       |"
   printf "%s%s%s %s%s\n" $start $1 "${line:${#1}}" $2 "${end:${#2}}"
+}
+
+function printtableborderrow() {
+ # printf "|  ----------------------------------------                                    |\n"
+}
+
+function printtableheaderrow() {
+  key="                    "
+  printrow $key "  Free    Used    Total"
+  printrow $key "--------------------------"
+}
+
+function printtablerowint() {
+  value=`printf " %05s%s | %04s%s | %05s%s " $2 $5 $3 $5 $4 $5`
+  printrow $1 $value
+}
+
+function printtablerowfloat() {
+  value=`printf " %5.1f%s | %4.1f%s | %5.1f%s " $2 $5 $3 $5 $4 $5`
+  printrow $1 $value
+}
+
+function printtablerowseparator() {
+  #printf "|   --------|--------|--------|-----------                                     |\n"
 }
 
 function printemptyrow() {
@@ -10,7 +34,17 @@ function printemptyrow() {
 }
 
 function printborderrow() {
-  printf "--------------------------------------------------------------------------------\n" 
+  printf "--------------------------------------------------------------------------------\n"
+}
+
+function getlocalip() {
+  ip=`/sbin/ifconfig $1 | /bin/grep "inet addr" | /usr/bin/cut -d ":" -f 2 | /usr/bin/cut -d " " -f 1`
+  if test -n "$ip"
+  then
+    echo $ip
+  else
+    echo "N/A"
+  fi
 }
 
 function welcomestats() {
@@ -21,19 +55,23 @@ function welcomestats() {
   let days=$((${upSeconds}/86400))
   STOOOOPS_UPTIME=`printf "%d days, %02d:%02d:%02d" "$days" "$hours" "$mins" "$secs"`
 
+  STOOOOPS_USER=`whoami`
+  STOOOOPS_HOST=`hostname`
+
   STOOOOPS_DATE=`date +"%Y-%m-%e"`
   STOOOOPS_TIME=`date +"%R (%:z)"`
-  
+
   STOOOOPS_KERNEL=`uname -sr`
   STOOOOPS_ARCHITECTURE=`uname -m`
   STOOOOPS_OS=`uname -o`
-  
+
   # get the load averages
   read STOOOOPS_LOAD_1 STOOOOPS_LOAD_5 STOOOOPS_LOAD_15 rest < /proc/loadavg
 
-  STOOOOPS_NETWORK_LOCAL_IP=`/sbin/ifconfig eth0 | /bin/grep "inet addr" | /usr/bin/cut -d ":" -f 2 | /usr/bin/cut -d " " -f 1`
+  STOOOOPS_NETWORK_LOCAL_IP_WLAN0=`getlocalip wlan0`
+  STOOOOPS_NETWORK_LOCAL_IP_ETH0=`getlocalip eth0`
   STOOOOPS_NETWORK_PUBLIC_IP=`curl -s icanhazip.com`
-  
+
   STOOOOPS_MEMORY_FREE_KB=`cat /proc/meminfo | grep MemFree | awk {'print $2'}`
   STOOOOPS_MEMORY_TOTAL_KB=`cat /proc/meminfo | grep MemTotal | awk {'print $2'}`
   STOOOOPS_MEMORY_USED_KB=`expr $STOOOOPS_MEMORY_TOTAL_KB - $STOOOOPS_MEMORY_FREE_KB`
@@ -41,18 +79,20 @@ function welcomestats() {
   STOOOOPS_MEMORY_TOTAL_MB=`expr $STOOOOPS_MEMORY_TOTAL_KB / 1000`
   STOOOOPS_MEMORY_USED_MB=`expr $STOOOOPS_MEMORY_USED_KB / 1000`
 
-  STOOOOPS_SWAP_FREE_KB = `free -k | tail -n 1 | awk{'print $2 $3 $4'} ` 
   read ignoretoken STOOOOPS_SWAP_TOTAL_KB STOOOOPS_SWAP_USED_KB STOOOOPS_SWAP_FREE_KB < \
       <(free -k | tail -n 1)
   read ignoretoken STOOOOPS_SWAP_TOTAL_MB STOOOOPS_SWAP_USED_MB STOOOOPS_SWAP_FREE_MB < \
       <(free -m | tail -n 1)
-  
-  STOOOOPS_DISK_USED_KB=`df / | awk '{ a = $3 } END { print a }'`
-  STOOOOPS_DISK_TOTAL_KB=`df / | awk '{ a = $4 } END { print a }'`
-  STOOOOPS_DISK_FREE_KB=`expr $STOOOOPS_DISK_TOTAL_KB - $STOOOOPS_DISK_USED_KB`
-  STOOOOPS_DISK_FREE_MB=`expr $STOOOOPS_DISK_FREE_KB / 1000`                
-  STOOOOPS_DISK_TOTAL_MB=`expr $STOOOOPS_DISK_TOTAL_KB / 1000`  
-  STOOOOPS_DISK_USED_MB=`expr $STOOOOPS_DISK_USED_KB / 1000`  
+
+  STOOOOPS_DISK_USED_K=`df / | awk '{ a = $3 } END { print a }'`
+  STOOOOPS_DISK_TOTAL_K=`df / | awk '{ a = $4 } END { print a }'`
+  STOOOOPS_DISK_FREE_K=`expr $STOOOOPS_DISK_TOTAL_K - $STOOOOPS_DISK_USED_KB`
+  STOOOOPS_DISK_FREE_M=`expr $STOOOOPS_DISK_FREE_K / 1024`
+  STOOOOPS_DISK_TOTAL_M=`expr $STOOOOPS_DISK_TOTAL_K / 1024`
+  STOOOOPS_DISK_USED_M=`expr $STOOOOPS_DISK_USED_K / 1024`
+  STOOOOPS_DISK_FREE_G=`echo $((1.0 * $STOOOOPS_DISK_FREE_M / 1024.0))`
+  STOOOOPS_DISK_TOTAL_G=`echo $((1.0 * $STOOOOPS_DISK_TOTAL_M / 1024.0))`
+  STOOOOPS_DISK_USED_G=`echo $((1.0 * $STOOOOPS_DISK_USED_M / 1024.0))`
 
   STOOOOPS_PROCESSES_RUNNING=`ps ax | wc -l | tr -d " "`
 
@@ -61,34 +101,48 @@ function welcomestats() {
 
   printborderrow
   printemptyrow
-  printtablerow "Time" "$STOOOOPS_DATE $STOOOOPS_TIME"
-  printtablerow "Uptime" $STOOOOPS_UPTIME
+
+  printrow "User" $STOOOOPS_USER
+  printrow "Host" $STOOOOPS_HOST
   printemptyrow
-  printtablerow "Public IP Address" $STOOOOPS_NETWORK_PUBLIC_IP
-  printtablerow "Local IP Address" $STOOOOPS_NETWORK_LOCAL_IP
+
+  printrow "Time" "$STOOOOPS_DATE $STOOOOPS_TIME"
+  printrow "Uptime" $STOOOOPS_UPTIME
+
   printemptyrow
-  printtablerow "Kernel" $STOOOOPS_KERNEL
-  printtablerow "Operating System" $STOOOOPS_OS
-  printtablerow "Architecture" $STOOOOPS_ARCHITECTURE
+
+  printrow "Public IP Address" $STOOOOPS_NETWORK_PUBLIC_IP
+  printrow "Local etho0 IP" $STOOOOPS_NETWORK_LOCAL_IP_ETH0
+  printrow "Local wlan0 IP" $STOOOOPS_NETWORK_LOCAL_IP_WLAN0
+
   printemptyrow
-  printtablerow "Free Memory" "${STOOOOPS_MEMORY_FREE_MB} mB (${STOOOOPS_MEMORY_FREE_KB} kB)"
-  printtablerow "Used Memory" "${STOOOOPS_MEMORY_USED_MB} mB (${STOOOOPS_MEMORY_USED_KB} kB)"
-  printtablerow "Total Memory" "${STOOOOPS_MEMORY_TOTAL_MB} mB (${STOOOOPS_MEMORY_TOTAL_KB} kB)"
+
+  printrow "Kernel" $STOOOOPS_KERNEL
+  printrow "Operating System" $STOOOOPS_OS
+  printrow "Architecture" $STOOOOPS_ARCHITECTURE
+
   printemptyrow
-  printtablerow "Free Swap Memory" "${STOOOOPS_SWAP_FREE_MB} mB (${STOOOOPS_SWAP_FREE_KB} kB)"
-  printtablerow "Used Swap Memory" "${STOOOOPS_SWAP_USED_MB} mB (${STOOOOPS_SWAP_USED_KB} kB)"
-  printtablerow "Total Swap Memory" "${STOOOOPS_SWAP_TOTAL_MB} mB (${STOOOOPS_SWAP_TOTAL_KB} kB)"
+
+  printtableborderrow
+  printtableheaderrow
+  printtablerowint "Memory" $STOOOOPS_MEMORY_FREE_MB $STOOOOPS_MEMORY_USED_MB $STOOOOPS_MEMORY_TOTAL_MB "M"
+  printtablerowseparator
+  printtablerowint "Swap" $STOOOOPS_SWAP_FREE_MB $STOOOOPS_SWAP_USED_MB $STOOOOPS_SWAP_TOTAL_MB "M"
+  printtablerowseparator
+  printtablerowfloat "Disk" $STOOOOPS_DISK_FREE_G $STOOOOPS_DISK_USED_G $STOOOOPS_DISK_TOTAL_G "G"
+  printtableborderrow
+
   printemptyrow
-  printtablerow "Free Disk Space" "${STOOOOPS_DISK_FREE_MB} mB (${STOOOOPS_DISK_FREE_KB} kB)"
-  printtablerow "Used Disk Space" "${STOOOOPS_DISK_USED_MB} mB (${STOOOOPS_DISK_USED_KB} kB)"
-  printtablerow "Total Disk Space" "${STOOOOPS_DISK_TOTAL_MB} mB (${STOOOOPS_DISK_TOTAL_KB} kB)"
+
+  printrow "Running Processes" $STOOOOPS_PROCESSES_RUNNING
+  printrow "Load Average 1m" $STOOOOPS_LOAD_1
+  printrow "Load Average 5m" $STOOOOPS_LOAD_5
+  printrow "Load Average 15m" $STOOOOPS_LOAD_15
+
   printemptyrow
-  printtablerow "Running Processes" $STOOOOPS_PROCESSES_RUNNING
-  printtablerow "Load Average 1m" $STOOOOPS_LOAD_1
-  printtablerow "Load Average 5m" $STOOOOPS_LOAD_5
-  printtablerow "Load Average 15m" $STOOOOPS_LOAD_15
-  printemptyrow
-  printtablerow "Weather" $STOOOOPS_WEATHER
+
+  printrow "Weather" $STOOOOPS_WEATHER
+
   printemptyrow
   printborderrow
 }
