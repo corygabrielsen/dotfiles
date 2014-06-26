@@ -42,7 +42,7 @@ function printmemoryswapdisktableheaderrow() {
 }
 
 function printloadaveragestableheaderrow() {
-  printrow "" "  1min     5min     15min"
+  printrow "" "  1min      5min     15min"
   printrow "" "----------------------------"
 }
 
@@ -202,20 +202,6 @@ function printprocessesrow() {
 }
 
 #################################
-## Load Averages
-#################################
-function printloadaveragestable() {
-
-  printtableborderrow
-  printloadaveragestableheaderrow
-
-  printrowstart "Load Average"
-  read STOOOOPS_LOAD_1 STOOOOPS_LOAD_5 STOOOOPS_LOAD_15 rest < /proc/loadavg
-  value=`printf "  %3.2f      %3.2f      %3.2f" $STOOOOPS_LOAD_1 $STOOOOPS_LOAD_5 $STOOOOPS_LOAD_15`
-  printrowend $value
-}
-
-#################################
 ## Weather
 #################################
 function printweatherrow() {
@@ -230,6 +216,20 @@ function printweatherrow() {
   else
     printrowend $STOOOOPS_WEATHER
   fi
+}
+
+#################################
+## Load Averages Table
+#################################
+function printloadaveragestable() {
+
+  printtableborderrow
+  printloadaveragestableheaderrow
+
+  printrowstart "Load Average"
+  read STOOOOPS_LOAD_1 STOOOOPS_LOAD_5 STOOOOPS_LOAD_15 rest < /proc/loadavg
+  value=`printf "  %3.2f      %3.2f      %3.2f" $STOOOOPS_LOAD_1 $STOOOOPS_LOAD_5 $STOOOOPS_LOAD_15`
+  printrowend $value
 }
 
 #################################
