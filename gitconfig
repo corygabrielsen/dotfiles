@@ -54,3 +54,7 @@
     tool = vimdiff
 [init]
 	templatedir = ~/.git-template
+[hooks]
+	showwhitespaceerrors = true
+	removetrailingwhitespace = true
+	removetrailingnewlines = true
