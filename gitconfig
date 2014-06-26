@@ -14,6 +14,7 @@
 
     d = diff
     dc = diff --cached
+    dcc = diff --cached --check
 
     f = fetch
 

@@ -29,6 +29,7 @@ alias gcp="git cp"
 
 alias gd="git d"
 alias gdc="git dc"
+alias gdcc="git dcc"
 
 alias gl="git l"
 alias gld="git ld"
