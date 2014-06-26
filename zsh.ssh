@@ -36,8 +36,13 @@ function printtableborderrow() {
  # printf "|  ----------------------------------------                                    |\n"
 }
 
-function printtableheaderrow() {
+function printmemoryswapdisktableheaderrow() {
   printrow "" "  Free     Used     Total"
+  printrow "" "----------------------------"
+}
+
+function printloadaveragestableheaderrow() {
+  printrow "" "  1min     5min     15min"
   printrow "" "----------------------------"
 }
 
@@ -199,12 +204,20 @@ function printprocessesrow() {
 #################################
 ## Load Averages
 #################################
-function printloadaveragesrow() {
-  printrowstart "LoadAverage 1m"
+function printloadaveragestable() {
+
+  printtableborderrow
+  printloadaveragestableheaderrow
+
+  printrowstart "Load Average"
   read STOOOOPS_LOAD_1 STOOOOPS_LOAD_5 STOOOOPS_LOAD_15 rest < /proc/loadavg
-  printrowend $STOOOOPS_LOAD_1
-  printrow "Load Average 5m" $STOOOOPS_LOAD_5
-  printrow "Load Average 15m" $STOOOOPS_LOAD_15
+  value=`printf "  %3.2f      %3.2f     %3.2f" $STOOOOPS_LOAD_1 $STOOOOPS_LOAD_5 $STOOOOPS_LOAD_15`
+  printrowend $value
+
+
+  #printrowend $STOOOOPS_LOAD_1
+  #printrow "Load Average 5m" $STOOOOPS_LOAD_5
+  #printrow "Load Average 15m" $STOOOOPS_LOAD_15
 }
 
 #################################
@@ -224,6 +237,21 @@ function printweatherrow() {
   fi
 }
 
+function printmemoryswapdisktable() {
+  printtableborderrow
+  printmemoryswapdisktableheaderrow
+
+  printmemorytablerow
+  printtablerowseparator
+
+  printswaptablerow
+  printtablerowseparator
+
+  printdisktablerow
+
+  printtableborderrow
+  printemptyrow
+}
 
 
 #################################
@@ -249,28 +277,20 @@ function stats() {
   printosarchrow
   printemptyrow
 
-  # Memory/Swap/Disk Table
-  printtableborderrow
-  printtableheaderrow
-
-  printmemorytablerow
-  printtablerowseparator
-
-  printswaptablerow
-  printtablerowseparator
-
-  printdisktablerow
-
-  printtableborderrow
+  # Processes
+  printprocessesrow
   printemptyrow
 
-  printprocessesrow
-  printloadaveragesrow
+  # Memory/Swap/Disk Table
+  printmemoryswapdisktable
+
+  # Load Averages
+  printloadaveragestable
   printemptyrow
 
   printweatherrow
-
   printemptyrow
+
   printborderrow
 }
 
