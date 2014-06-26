@@ -180,7 +180,7 @@ function printdatetimerow() {
 function printinforow() {
   printrowstart "User"
   STOOOOPS_USER=`whoami`
-  printrowend "User" $STOOOOPS_USER
+  printrowend $STOOOOPS_USER
 
   printrowstart "Host"
   STOOOOPS_HOST=`hostname` 
@@ -223,6 +223,8 @@ function printweatherrow() {
     printrowend $STOOOOPS_WEATHER
   fi
 }
+
+
 
 #################################
 ## Stats
