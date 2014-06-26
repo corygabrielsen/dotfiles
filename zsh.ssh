@@ -211,13 +211,8 @@ function printloadaveragestable() {
 
   printrowstart "Load Average"
   read STOOOOPS_LOAD_1 STOOOOPS_LOAD_5 STOOOOPS_LOAD_15 rest < /proc/loadavg
-  value=`printf "  %3.2f      %3.2f     %3.2f" $STOOOOPS_LOAD_1 $STOOOOPS_LOAD_5 $STOOOOPS_LOAD_15`
+  value=`printf "  %3.2f      %3.2f      %3.2f" $STOOOOPS_LOAD_1 $STOOOOPS_LOAD_5 $STOOOOPS_LOAD_15`
   printrowend $value
-
-
-  #printrowend $STOOOOPS_LOAD_1
-  #printrow "Load Average 5m" $STOOOOPS_LOAD_5
-  #printrow "Load Average 15m" $STOOOOPS_LOAD_15
 }
 
 #################################
@@ -237,6 +232,9 @@ function printweatherrow() {
   fi
 }
 
+#################################
+## Memory/Swap/Disk Table
+#################################
 function printmemoryswapdisktable() {
   printtableborderrow
   printmemoryswapdisktableheaderrow
