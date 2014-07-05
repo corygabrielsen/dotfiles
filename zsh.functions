@@ -1,6 +1,6 @@
 # Define custom functions
 function gfind ()
-    find $2 -type f -exec grep -Hn $1 {} \;
+    find $2 -type f -exec grep -Hn --color=always $1 {} \;
 
 # Trim trailing whitespace
 #function ttws ()
