@@ -31,6 +31,8 @@ alias gd="git d"
 alias gdc="git dc"
 alias gdcc="git dcc"
 
+alias gi="git i"
+
 alias gl="git l"
 alias gld="git ld"
 alias glg="git lg"

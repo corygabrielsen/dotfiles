@@ -18,6 +18,8 @@
 
     f = fetch
 
+    i = init
+
     l = log
     ld = log --pretty=format:"%C(yellow)%h\\ %C(magenta)%ad%C(auto)%d\\ %C(reset)%s%C(blue)\\ [%cn]%C(reset)" --decorate --date=short
     ldag = log --decorate --all --graph
