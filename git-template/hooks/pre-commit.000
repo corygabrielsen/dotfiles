@@ -1,0 +1,173 @@
+#!/bin/bash
+
+COLOR_NONE='\033[00m'
+COLOR_BLACK="\033[30m"
+COLOR_RED="\033[31m"
+COLOR_GREEN="\033[32m"
+COLOR_YELLOW="\033[33m"
+COLOR_BLUE="\033[34m"
+COLOR_MAGENTA="\033[35m"
+COLOR_CYAN="\033[36m"
+
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+	against=HEAD
+else
+	# Initial commit: diff against an empty tree object
+	against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+# If you want to allow non-ASCII filenames set this variable to true.
+allownonascii=$(git config --bool hooks.allownonascii)
+
+# Redirect output to stderr.
+exec 1>&2
+
+# Cross platform projects tend to avoid non-ASCII filenames; prevent
+# them from being added to the repository. We exploit the fact that the
+# printable range starts at the space character and ends with tilde.
+if [ "$allownonascii" != "true" ] &&
+	# Note that the use of brackets around a tr range is ok here, (it's
+	# even required, for portability to Solaris 10's /usr/bin/tr), since
+	# the square bracket bytes happen to fall in the designated range.
+	test $(git diff --cached --name-only --diff-filter=A -z $against |
+	  LC_ALL=C tr -d '[ -~]\0' | wc -c) != 0
+then
+	cat <<\EOF
+Error: Attempt to add a non-ASCII file name.
+
+This can cause problems if you want to work with people on other platforms.
+
+To be portable it is advisable to rename the file.
+
+If you know what you are doing you can disable this check using:
+
+  git config hooks.allownonascii true
+EOF
+	exit 1
+fi
+
+
+attempt_whitespace_fix="false"
+
+# First, show whitespace errors
+showwhitespaceerrors=$(git config --bool hooks.showwhitespaceerrors)
+if [ "$showwhitespaceerrors" == "true" ]; then
+  echo "Displaying whitespace errors..."
+  # If there are whitespace errors, print the offending file names and fail.
+  git diff-index --check --cached $against --
+  echo
+else
+  printf "Not displaying whitespace errors. To enable displaying whitespace errors, use:
+\n  git config hooks.showwhitespaceerrors true\n\n"
+fi
+
+###############################################
+# Script
+###############################################
+# http://makandracards.com/makandra/11541-how-to-not-leave-trailing-whitespace-using-your-editor-or-git
+
+# further credits:
+# https://github.com/philz/snippets/blob/master/pre-commit-remove-trailing-whitespace.sh
+# https://github.com/imoldman/config/blob/master/pre-commit.git.sh
+
+# change IFS to ignore filename's space in |for|
+IFS="
+"
+whitespace_changed="false"
+removetrailingwhitespace=$(git config --bool hooks.removetrailingwhitespace)
+if [ "$removetrailingwhitespace" == "true" ]; then
+  attempt_whitespace_fix="true"
+  echo "Removing trailing whitespace in modified lines..."
+
+  for line in `git diff --check --cached | sed '/^[+-]/d'` ; do
+    # get file name
+    file="`echo $line | sed -r 's/:[0-9]+: .*//'`"
+    line_number="`echo $line | sed -r 's/.*:([0-9]+).*/\1/'`"
+
+    # since $file in working directory isn't always equal to $file in index,
+    # we backup it; thereby we can add our whitespace fixes without accidently
+    # adding unstaged changes
+    backup_file="${file}.working_directory_backup"
+    cat "$file" > "$backup_file"
+    git checkout -- "$file" # discard unstaged changes in working directory
+
+    # remove trailing whitespace in $file (modified lines only)
+    sed --in-place "${line_number}s/[[:space:]]*$//" "$file"
+    git add "$file" # to index, so our whitespace changes will be committed
+
+    # restore unstaged changes in $file from its working directory backup, fixing
+    # whitespace that we fixed above
+    sed "${line_number}s/[[:space:]]*$//" "$backup_file" > "$file"
+    rm "$backup_file"
+    
+    wspace="trailing whitespace"
+    if [[ $line == *$wspace* ]]; then
+      if [[ $whitespace_changed == "false" ]]; then
+        echo -e $COLOR_RED"Error: Trailing whitespace errors found"$COLOR_NONE
+      fi
+      whitespace_changed="true"
+      echo -e "Removed trailing whitespace in "$COLOR_YELLOW$file$COLOR_NONE":"$COLOR_MAGENTA$line_number$COLOR_NONE
+    fi
+  done
+  if [[ $whitespace_changed == "false" ]]; then
+    echo "No changes necessary."
+  fi
+  echo
+else
+ printf "Leaving trailing whitespace unchanged. To enable removing trailing newlines, use:
+\n  git config hooks.removetrailingwhitespace true\n\n"
+fi
+
+###############################################
+# /script
+###############################################
+newlines_changed="false"
+# Trim trailing newlines
+removetrailingnewlines=$(git config --bool hooks.removetrailingnewlines)
+if [ "$removetrailingnewlines" == "true" ]; then
+  attempt_whitespace_fix="true"
+  echo "Removing trailing newlines in modified files..."
+
+  for file in `git ls-files -m --cached`; do
+    blank_line_msg="new blank line at EOF"
+    if [[ `git diff --check --cached $file` == *$blank_line_msg* ]]; then
+      if [[ $newlines_changed == "false" ]]; then
+        echo -e $COLOR_RED"Error: Trailing newline errors found"$COLOR_NONE
+      fi
+      newlines_changed="true"
+
+      backup_file="${file}.working_directory_backup"
+      cat "$file" > "$backup_file"
+      git checkout -- "$file" # discard unstaged changes in working directory
+
+      # Delete all trailing blank lines at end of file (only).
+      sed --in-place -e :a -e '/^\n*$/{$d;N;};/\n$/ba' $file
+      git add "$file" # stage changes
+
+      # Restore working file, fixing changes above
+      sed -e :a -e '/^\n*$/{$d;N;};/\n$/ba' "$backup_file" > "$file"
+      rm "$backup_file"
+
+      echo -e "Removed trailing newlines in "$COLOR_YELLOW$file$COLOR_NONE
+    fi
+  done
+  if [[ $newlines_changed == "false" ]]; then
+    echo "No changes necessary."
+  fi
+  echo
+else
+ printf "Leaving trailing newlines unchanged. To enable removing trailing newlines, use:
+\n  git config hooks.removetrailingnewlines true\n\n"
+fi
+
+if [[ $attempt_whitespace_fix == "true" ]]; then
+  if [[ $whitespace_changed == "true" || $newlines_changed == "true" ]]; then
+    echo -e $COLOR_GREEN"Corrections have been made to the affected file(s)."$COLOR_NONE
+  fi
+fi
+
+
+# Everything's okay, do the commit
+#echo -e $COLOR_BLUE"${BASH_SOURCE[0]}"$COLOR_NONE" finished successfully"
+exit 0
