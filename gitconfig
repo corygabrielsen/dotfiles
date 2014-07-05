@@ -18,12 +18,12 @@
 
     f = fetch
 
-    l = log --pretty=format:"%C(yellow)%h%C(auto)%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
-    ld = log --pretty=format:"%C(yellow)%h\\ %C(magenta)%ad%C(auto)%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
-    lg = log --pretty=format:"%C(yellow)%h%C(auto)%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --graph
-    lgd = log --pretty=format:"%C(yellow)%h\\ %C(magenta)%ad%C(auto)%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --graph --date=short
-    ll = log --pretty=format:"%C(yellow)%h%C(auto)%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
-    lld = log --pretty=format:"%C(yellow)%h\\ %C(magenta)%ad%C(auto)%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat --date=short
+    l = log --pretty=format:"%C(yellow)%h%C(auto)%d\\ %C(reset)%s%C(blue)\\ [%cn]%C(reset)" --decorate
+    ld = log --pretty=format:"%C(yellow)%h\\ %C(magenta)%ad%C(auto)%d\\ %C(reset)%s%C(blue)\\ [%cn]%C(reset)" --decorate --date=short
+    lg = log --pretty=format:"%C(yellow)%h%C(auto)%d\\ %C(reset)%s%C(blue)\\ [%cn]%C(reset)" --decorate --graph
+    lgd = log --pretty=format:"%C(yellow)%h\\ %C(magenta)%ad%C(auto)%d\\ %C(reset)%s%C(blue)\\ [%cn]%C(reset)" --decorate --graph --date=short
+    ll = log --pretty=format:"%C(yellow)%h%C(auto)%d\\ %C(reset)%s%C(blue)\\ [%cn]%C(reset)" --decorate --numstat
+    lld = log --pretty=format:"%C(yellow)%h\\ %C(magenta)%ad%C(auto)%d\\ %C(reset)%s%C(blue)\\ [%cn]%C(reset)" --decorate --numstat --date=short
 
     pl = pull
 
