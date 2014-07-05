@@ -40,21 +40,26 @@
     changed = yellow
     untracked = cyan
 
+[core]
+    pager = less -r
+
 [credential]
     helper = cache --timeout 3600
 
 [diff]
     tool = vimdiff
 
-[include]
-    # For username / creds / backwards-compatability / etc.
-    path = ~/.gitconfig.local
-
-[merge]
-    tool = vimdiff
-[init]
-	templatedir = ~/.git-template
 [hooks]
 	showwhitespaceerrors = true
 	removetrailingwhitespace = true
 	removetrailingnewlines = true
+
+[include]
+    # For username / creds / backwards-compatability / etc.
+    path = ~/.gitconfig.local
+
+[init]
+	templatedir = ~/.git-template
+
+[merge]
+    tool = vimdiff
