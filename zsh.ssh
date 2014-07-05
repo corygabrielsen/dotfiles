@@ -5,7 +5,8 @@ function printrow() {
     dotline="                    "
   fi
   endspaces=`for i in {${#2}..54}; do printf " "; done`
-  printf "|  %s%s %s%s|\n" "$1" $dotline "$2" $endspaces
+#  printf "|  %s%s %s%s|\n" "$1" $dotline "$2" $endspaces
+  printf "%s%s %s\n" "$1" $dotline "$2"
 }
 
 function printrowstart() {
@@ -14,12 +15,14 @@ function printrowstart() {
   else
     dotline="                    "
   fi
-  printf "|  %s%s " "$1" $dotline
+#  printf "|  %s%s " "$1" $dotline
+  printf "%s%s " "$1" $dotline
 }
 
 function printrowend() {
   endspaces=`for i in {${#1}..54}; do printf " "; done`
-  printf "%s%s|\n" "$1" $endspaces
+#  printf "%s%s|\n" "$1" $endspaces
+  printf "%s\n" $1
 }
 
 function printtablerowintend() {
@@ -61,7 +64,8 @@ function printtablerowseparator() {
 }
 
 function printemptyrow() {
-  printf "|%78s|\n"
+#  printf "|%78s|\n"
+  printf "%78s\n"
 }
 
 function printborderrow() {
@@ -256,8 +260,8 @@ function printmemoryswapdisktable() {
 ## Stats
 #################################
 function stats() {
-  printborderrow
-  printemptyrow
+#  printborderrow
+#  printemptyrow
 
   # Info
   printinforow
@@ -287,9 +291,9 @@ function stats() {
   printemptyrow
 
   printweatherrow
-  printemptyrow
+#  printemptyrow
 
-  printborderrow
+#  printborderrow
 }
 
 
