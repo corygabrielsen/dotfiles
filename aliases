@@ -35,6 +35,7 @@ alias gi="git i"
 
 alias gl="git l"
 alias gld="git ld"
+alias gldag="git ldag"
 alias glg="git lg"
 alias glgd="git lgd"
 alias gll="git ll"

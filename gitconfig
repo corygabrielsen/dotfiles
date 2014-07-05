@@ -20,14 +20,14 @@
 
     i = init
 
-    l = log
-    ld = log --pretty=format:\"%C(yellow)%h\\ %C(magenta)%ad%C(auto)%d\\ %C(reset)%s%C(blue)\\ [%cn]%C(reset)\" --decorate --date=short
+    l    = log
+    ld   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(magenta)%ad%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --date=short
     ldag = log --decorate --all --graph
-    lg = log --pretty=format:\"%C(yellow)%h%C(auto)%d\\ %C(reset)%s%C(blue)\\ [%cn]%C(reset)\" --decorate --graph
-    lgd = log --pretty=format:\"%C(yellow)%h\\ %C(magenta)%ad%C(auto)%d\\ %C(reset)%s%C(blue)\\ [%cn]%C(reset)\" --decorate --graph --date=short
-    ll = log --pretty=format:\"%C(yellow)%h%C(auto)%d\\ %C(reset)%s%C(blue)\\ [%cn]%C(reset)\" --decorate --numstat
-    lld = log --pretty=format:\"%C(yellow)%h\\ %C(magenta)%ad%C(auto)%d\\ %C(reset)%s%C(blue)\\ [%cn]%C(reset)\" --decorate --numstat --date=short
-    ls = log --pretty=format:\"%C(yellow)%h%C(auto)%d\\ %C(reset)%s%C(blue)\\ [%cn]%C(reset)\" --decorate
+    lg   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --graph
+    lgd  = log --pretty=format:\"%C(yellow)%h%C(reset) %C(magenta)%ad%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --graph --date=short
+    ll   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --numstat
+    lld  = log --pretty=format:\"%C(yellow)%h%C(reset) %C(magenta)%ad%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --numstat --date=short
+    ls   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate
 
     pl = pull
 
