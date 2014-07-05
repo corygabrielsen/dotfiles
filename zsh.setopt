@@ -1,0 +1,7 @@
+# add new history lines incrementally rather than waiting until the shell exits
+setopt inc_append_history
+
+setopt share_history
+
+# save each command's beginning timestamp and duration
+setopt extended_history

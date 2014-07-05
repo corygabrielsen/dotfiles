@@ -3,6 +3,10 @@ if [ -f ~/.zsh.oh-my-zsh ]; then
   source ~/.zsh.oh-my-zsh
 fi
 
+if [ -f ~/.zsh.setopt ]; then
+    source ~/.zsh.setopt
+fi
+
 # Read aliases
 if [ -f ~/.aliases ]; then
   source ~/.aliases
