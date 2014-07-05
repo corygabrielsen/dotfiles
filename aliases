@@ -49,9 +49,11 @@ alias gpu="git pu"
 alias gst="git st"
 alias gsb="git sb"
 
-alias grs1="git rs1"
-alias grs2="git rs2"
-alias grs3="git rs3"
+alias grs="git rs"
+alias grss="git rss"
+alias grss1="git rss1"
+alias grss2="git rss2"
+alias grss3="git rss3"
 
 if [ -f ~/.aliases.local ]; then
   source ~/.aliases.local

@@ -36,9 +36,11 @@
     st = status
     sb = status -sb
 
-    rs1 = reset --soft \"HEAD^\"
-    rs2 = reset --soft \"HEAD^^\"
-    rs3 = reset --soft \"HEAD^^^\"
+    rs = reset
+    rss = reset --soft
+    rss1 = reset --soft \"HEAD^\"
+    rss2 = reset --soft \"HEAD^^\"
+    rss3 = reset --soft \"HEAD^^^\"
 
 [color]
     ui = auto
