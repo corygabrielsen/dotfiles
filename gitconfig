@@ -1,3 +1,9 @@
+[advice]
+    statusHints = false
+    detachedHead = false
+    pushNonFastForward = false
+    resolveConflict = false
+
 [alias]
     a = add
 
