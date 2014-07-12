@@ -107,7 +107,8 @@ function printosarchrow() {
 #################################
 function printnetworkrow() {  
   printrowstart "Public IP Address"
-  STOOOOPS_NETWORK_PUBLIC_IP=`curl -s icanhazip.com`
+  STOOOOPS_NETWORK_PUBLIC_IP_TIMEOUT_SECS=5
+  STOOOOPS_NETWORK_PUBLIC_IP=`curl --max-time $STOOOOPS_NETWORK_PUBLIC_IP_TIMEOUT_SECS -s icanhazip.com`
   printrowend $STOOOOPS_NETWORK_PUBLIC_IP
 
   printrowstart "Local etho0 IP"
@@ -210,8 +211,9 @@ function printprocessesrow() {
 #################################
 function printweatherrow() {
   printrowstart "Weather"
+  STOOOOPS_WEATHER_TIMEOUT_SECS=5
   STOOOOPS_WEATHER_URL="http://www.accuweather.com/en/us/seattle-wa/98104/weather-forecast/351409"
-  STOOOOPS_WEATHER_WGET=`wget -q -O- $STOOOOPS_WEATHER_URL`
+  STOOOOPS_WEATHER_WGET=`wget --timeout=$STOOOOPS_WEATHER_TIMEOUT_SECS -q -O- $STOOOOPS_WEATHER_URL`
   STOOOOPS_WEATHER=` echo $STOOOOPS_WEATHER_WGET | awk -F\' '/acm_RecentLocationsCarousel\.push/{print $12"°F "$16}' | head -n 1`
   DEGREE_SYMBOL="°"
   if [ ${#DEGREE_SYMBOL} -eq 2 ]; then
