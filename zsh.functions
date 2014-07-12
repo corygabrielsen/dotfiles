@@ -3,5 +3,5 @@ function gfind ()
     find $2 -type f -exec grep -Hn --color=always $1 {} \;
 
 # Trim trailing whitespace
-#function ttws ()
-    
+function ttws ()
+    sed -e 's/[[:blank:]]*$//' "$1"
