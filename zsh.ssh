@@ -218,7 +218,7 @@ function printweatherrow() {
   DEGREE_SYMBOL="°"
   if [ ${#DEGREE_SYMBOL} -eq 2 ]; then
     endspaces=`for i in {${#STOOOOPS_WEATHER}..54}; do printf " "; done`
-    printf "%s%s |\n" "$STOOOOPS_WEATHER" $endspaces
+    printf "%s%s\n" "$STOOOOPS_WEATHER" $endspaces
   else
     printrowend $STOOOOPS_WEATHER
   fi
