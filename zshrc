@@ -1,3 +1,8 @@
+# Read local pre-zshrc, if present
+if [ -f ~/.zshrc.local.before ]; then
+  source ~/.zshrc.local.before
+fi
+
 # Read Oh-My-Zsh
 if [ -f ~/.zsh.oh-my-zsh ]; then
   source ~/.zsh.oh-my-zsh
@@ -27,8 +32,8 @@ if [ -f ~/.zsh.ssh ]; then
   source ~/.zsh.ssh
 fi
 
-# Read local zshrc, if present
-if [ -f ~/.zshrc.local ]; then
-  source ~/.zshrc.local
+# Read local post-zshrc, if present
+if [ -f ~/.zshrc.local.after ]; then
+  source ~/.zshrc.local.after
 fi
 
