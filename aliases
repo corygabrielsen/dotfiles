@@ -1,14 +1,15 @@
 ##############################
 # UNIX commands
 ##############################
-alias ls="ls -h --color=auto"
-alias ll="ls -lv --color=auto"
-alias lla="ls -alv --color=auto"
+alias ls="ls -Fh --color=auto"
+alias ll="ls -Flv --color=auto"
+alias lla="ls -aFlv --color=auto"
 
 alias cp="cp -i"
 alias mv="mv -i"
 alias rm="rm -i"
 
+alias s="sudo"
 ##############################
 # Git
 ##############################
