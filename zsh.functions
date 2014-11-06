@@ -4,4 +4,4 @@ function gfind ()
 
 # Trim trailing whitespace
 function ttws ()
-    sed -e 's/[[:blank:]]*$//' "$1"
+    cat $1 | sed -e 's/[[:blank:]]*$//'

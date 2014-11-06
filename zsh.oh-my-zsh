@@ -50,7 +50,11 @@ ZSH_THEME="stoooops"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 plugins=( )
 
-source $ZSH/oh-my-zsh.sh
+if [ "$STOOOOPS_OH_MY_ZSH_THEME_ONLY" = true ]; then
+  source $ZSH/themes/$ZSH_THEME.zsh-theme
+else
+  source $ZSH/oh-my-zsh.sh
+fi
 
 # User configuration
 
