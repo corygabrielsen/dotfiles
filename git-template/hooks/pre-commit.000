@@ -107,7 +107,7 @@ if [ "$removetrailingwhitespace" == "true" ]; then
         echo -e $COLOR_RED"Error: Trailing whitespace errors found"$COLOR_NONE
       fi
       whitespace_changed="true"
-      echo -e "Removed trailing whitespace in "$COLOR_YELLOW$file$COLOR_NONE":"$COLOR_MAGENTA$line_number$COLOR_NONE
+      echo -e "Removed trailing whitespace on "$COLOR_YELLOW$file$COLOR_NONE":"$COLOR_MAGENTA$line_number$COLOR_NONE
     fi
   done
   if [[ $whitespace_changed == "false" ]]; then
@@ -149,7 +149,7 @@ if [ "$removetrailingnewlines" == "true" ]; then
       sed -e :a -e '/^\n*$/{$d;N;};/\n$/ba' "$backup_file" > "$file"
       rm "$backup_file"
 
-      echo -e "Removed trailing newlines in "$COLOR_YELLOW$file$COLOR_NONE
+      echo -e "Removed trailing newlines on "$COLOR_YELLOW$file$COLOR_NONE
     fi
   done
   if [[ $newlines_changed == "false" ]]; then
@@ -164,6 +164,8 @@ fi
 if [[ $attempt_whitespace_fix == "true" ]]; then
   if [[ $whitespace_changed == "true" || $newlines_changed == "true" ]]; then
     echo -e $COLOR_GREEN"Corrections have been made to the affected file(s)."$COLOR_NONE
+    read -p "Press any key to continue..." -n 1 -s </dev/tty
+    echo
   fi
 fi
 
