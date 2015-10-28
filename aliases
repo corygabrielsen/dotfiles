@@ -10,6 +10,13 @@ alias mv="mv -i"
 alias rm="rm -i"
 
 alias s="sudo"
+
+##############################
+# Other
+##############################
+# Run Sublime Text in another session
+alias subl="setsid subl"
+
 ##############################
 # Git
 ##############################
