@@ -66,16 +66,16 @@
     tool = vimdiff
 
 [hooks]
-	showwhitespaceerrors = true
-	removetrailingwhitespace = true
-	removetrailingnewlines = true
+    showwhitespaceerrors = true
+    removetrailingwhitespace = true
+    removetrailingnewlines = true
 
 [include]
     # For username / creds / backwards-compatability / etc.
     path = ~/.gitconfig.local
 
 [init]
-	templatedir = ~/.git-template
+    templatedir = ~/.git-template
 
 [merge]
     tool = vimdiff
