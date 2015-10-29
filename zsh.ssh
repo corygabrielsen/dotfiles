@@ -88,6 +88,14 @@ function localip() {
 ## OS/Arch
 #################################
 function printosarchrow() {
+  printrowstart "Operating System"
+  STOOOOPS_OS=`uname -o`
+  printrowend $STOOOOPS_OS
+
+  printrowstart "Distribution"
+  STOOOOPS_DISTRIBUTION=`lsb_release -d | cut -c 14-`
+  printrowend $STOOOOPS_DISTRIBUTION
+  
   printrowstart "Kernel"
   STOOOOPS_KERNEL=`uname -sr`
   printrowend $STOOOOPS_KERNEL
@@ -95,11 +103,6 @@ function printosarchrow() {
   printrowstart "Architecture"
   STOOOOPS_ARCHITECTURE=`uname -m`
   printrowend $STOOOOPS_ARCHITECTURE
-
-
-  printrowstart "Operating System"
-  STOOOOPS_OS=`uname -o`
-  printrowend $STOOOOPS_OS
 }
 
 #################################
