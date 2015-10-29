@@ -111,7 +111,7 @@ function printosarchrow() {
 function printnetworkrow() {  
   printrowstart "Public IP Address"
   STOOOOPS_NETWORK_PUBLIC_IP_TIMEOUT_SECS=5
-  STOOOOPS_NETWORK_PUBLIC_IP=`curl --max-time $STOOOOPS_NETWORK_PUBLIC_IP_TIMEOUT_SECS -s icanhazip.com`
+  STOOOOPS_NETWORK_PUBLIC_IP=`wget --timeout=$STOOOOPS_NETWORK_PUBLIC_IP_TIMEOUT_SECS http://ipinfo.io/ip -qO -`
   printrowend $STOOOOPS_NETWORK_PUBLIC_IP
 
   printrowstart "Local etho0 IP"
