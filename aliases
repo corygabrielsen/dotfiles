@@ -55,6 +55,7 @@ alias gpl="git pl"
 alias gpu="git pu"
 
 alias gst="git st"
+alias gstu="git stu"
 alias gsb="git sb"
 
 alias grs="git rs"
