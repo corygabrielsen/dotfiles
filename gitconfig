@@ -40,6 +40,8 @@
 
     pu = push
 
+    ss = show --summary
+
     st = status
     stu = status -u
     sb = status -sb
