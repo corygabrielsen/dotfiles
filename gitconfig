@@ -30,23 +30,32 @@
     ld   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(magenta)%ad%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --date=short
     ldag = log --decorate --all --graph
     lg   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --graph
+    lga  = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --graph --all
     lgd  = log --pretty=format:\"%C(yellow)%h%C(reset) %C(magenta)%ad%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --graph --date=short
     ll   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --numstat
     lld  = log --pretty=format:\"%C(yellow)%h%C(reset) %C(magenta)%ad%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --numstat --date=short
     ls   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate
 
+    m = merge
+
     pl = pull
 
     pu = push
 
+    ss = show --summary
+
     st = status
+    stu = status -u
     sb = status -sb
+
+    r = rebase
 
     rs = reset
     rss = reset --soft
     rss1 = reset --soft \"HEAD^\"
     rss2 = reset --soft \"HEAD^^\"
     rss3 = reset --soft \"HEAD^^^\"
+	dag = log --graph --format='format:%C(yellow)%h%C(reset) %C(blue)\"%an\" <%ae>%C(reset) %C(magenta)%cr%C(reset)%C(auto)%d%C(reset)%n%s' --date-order
 
 [color]
     ui = auto
@@ -79,3 +88,8 @@
 
 [merge]
     tool = vimdiff
+[user]
+	email = corygabr@amazon.com
+	name = Cory Gabrielsen
+[push]
+	default = simple

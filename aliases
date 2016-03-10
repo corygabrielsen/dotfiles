@@ -10,6 +10,13 @@ alias mv="mv -i"
 alias rm="rm -i"
 
 alias s="sudo"
+
+##############################
+# Other
+##############################
+# Run Sublime Text in another session
+alias subl="setsid subl"
+
 ##############################
 # Git
 ##############################
@@ -38,18 +45,25 @@ alias gl="git l"
 alias gld="git ld"
 alias gldag="git ldag"
 alias glg="git lg"
+alias glga="git lga"
 alias glgd="git lgd"
 alias gll="git ll"
 alias glld="git lld"
 alias gls="git ls"
 
+alias gm="git m"
+
 alias gpl="git pl"
 
 alias gpu="git pu"
 
+alias gss="git ss"
 alias gst="git st"
+alias gstu="git stu"
 alias gsb="git sb"
 
+
+alias gr="git r"
 alias grs="git rs"
 alias grss="git rss"
 alias grss1="git rss1"
