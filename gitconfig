@@ -8,11 +8,15 @@
     a = add
 
     b = branch
+    bm = branch --move
 
     c = commit
-    ca = commit -a
-    cm = commit -m
-    cam = commit -am
+    ca = commit --all
+    cm = commit --message
+    cam = commit --all --message
+    camd = commit --amend
+    caamd = commit --all --amend
+    camamd = commit --all --message --amend
 
     co = checkout
 
@@ -21,6 +25,10 @@
     d = diff
     dc = diff --cached
     dcc = diff --cached --check
+    dh = diff HEAD^ HEAD
+    dnr = diff --no-renames
+    dw = diff --ignore-all-space
+    dwnr = diff --ignore-all-space --no-renames
 
     f = fetch
 
@@ -48,7 +56,9 @@
     stu = status -u
     sb = status -sb
 
-    r = rebase
+    rb = rebase
+    rbc = rebase --continue
+    rbs = rebase --skip
 
     rs = reset
     rss = reset --soft

@@ -22,25 +22,44 @@ alias subl="setsid subl"
 ##############################
 alias g="git"
 
+# add
 alias ga="git a"
 
+# branch
 alias gb="git b"
+alias gbm="git bm"
 
+# commit
 alias gc="git c"
 alias gca="git ca"
 alias gcm="git cm"
 alias gcam="git cam"
+alias gcamd="git camd"
+alias gacamd="git caamd"
+alias gamcamd="git camamd"
 
+# checkout
 alias gco="git co"
 
+# cherry-pick
 alias gcp="git cp"
 
+# diff
 alias gd="git d"
 alias gdc="git dc"
 alias gdcc="git dcc"
+alias gdh="git dh"
+alias gdnr="git dnr"
+alias gdw="git dw"
+alias gdwnr="git dwnr"
 
+# fetch
+alias gf="git f"
+
+# init
 alias gi="git i"
 
+# log
 alias gl="git l"
 alias gld="git ld"
 alias gldag="git ldag"
@@ -51,19 +70,27 @@ alias gll="git ll"
 alias glld="git lld"
 alias gls="git ls"
 
+# merge
 alias gm="git m"
 
+# pull
 alias gpl="git pl"
 
+# push
 alias gpu="git pu"
 
+# status
 alias gss="git ss"
 alias gst="git st"
 alias gstu="git stu"
 alias gsb="git sb"
 
+# rebase
+alias grb="git rb"
+alias grbc="git rbc"
+alias grbs="git rbs"
 
-alias gr="git r"
+# reset
 alias grs="git rs"
 alias grss="git rss"
 alias grss1="git rss1"
