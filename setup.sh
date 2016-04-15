@@ -1,7 +1,7 @@
 #!/bin/bash
 
-dir="/home/corygabr/dev/dotfiles"
-files=(aliases gitconfig git-template vim vimrc zsh.env zsh.functions zsh.oh-my-zsh zsh.setopt zsh.ssh zshrc)
+dev_dotfiles_dir="$HOME/dev/dotfiles"
+files=(aliases gitconfig git-template oh-my-zsh vim vimrc zsh.env zsh.functions zsh.oh-my-zsh zsh.setopt zsh.ssh zshrc)
 
 # Verify all files exist
 echo "Validating setup context..."
@@ -35,6 +35,6 @@ for file in "${files[@]}"; do
         echo "~/.$file does not exist"
     fi
     echo "Linking ~/.$file to $dir/$file"
-    ln -s $dir/$file ~/.$file
+    ln -s $dev_dotfiles_dir/$file ~/.$file
     echo
 done
