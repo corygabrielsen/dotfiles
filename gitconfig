@@ -87,7 +87,7 @@
 [hooks]
     showwhitespaceerrors = true
     removetrailingwhitespace = true
-    removetrailingnewlines = true
+    removetrailingnewlines = false
 
 [include]
     # For username / creds / backwards-compatability / etc.
