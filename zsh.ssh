@@ -110,7 +110,7 @@ function printosarchrow() {
 #################################
 function printnetworkrow() {  
   printrowstart "Public IP Address"
-  STOOOOPS_NETWORK_PUBLIC_IP_TIMEOUT_SECS=5
+  STOOOOPS_NETWORK_PUBLIC_IP_TIMEOUT_SECS=2
   STOOOOPS_NETWORK_PUBLIC_IP=`wget --timeout=$STOOOOPS_NETWORK_PUBLIC_IP_TIMEOUT_SECS http://ipinfo.io/ip -qO -`
   printrowend $STOOOOPS_NETWORK_PUBLIC_IP
 
@@ -214,7 +214,7 @@ function printprocessesrow() {
 #################################
 function printweatherrow() {
   printrowstart "Weather"
-  STOOOOPS_WEATHER_TIMEOUT_SECS=5
+  STOOOOPS_WEATHER_TIMEOUT_SECS=2
   STOOOOPS_WEATHER_URL="http://www.accuweather.com/en/us/seattle-wa/98104/weather-forecast/351409"
   STOOOOPS_WEATHER_WGET=`wget --timeout=$STOOOOPS_WEATHER_TIMEOUT_SECS -q -O- $STOOOOPS_WEATHER_URL`
   STOOOOPS_WEATHER=` echo $STOOOOPS_WEATHER_WGET | awk -F\' '/acm_RecentLocationsCarousel\.push/{print $12"°F "$16}' | head -n 1`
