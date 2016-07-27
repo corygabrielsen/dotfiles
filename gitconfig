@@ -99,7 +99,6 @@
 [merge]
     tool = vimdiff
 [user]
-	email = corygabr@amazon.com
 	name = Cory Gabrielsen
 [push]
 	default = simple
