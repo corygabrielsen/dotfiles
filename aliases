@@ -1,9 +1,9 @@
 ##############################
 # UNIX commands
 ##############################
-alias ls="ls -Fh --color=auto"
-alias ll="ls -Flv --color=auto"
-alias lla="ls -aFlv --color=auto"
+alias ls="ls -Fh"
+alias ll="ls -Flv"
+alias lla="ls -aFlv"
 
 alias cp="cp -i"
 alias mv="mv -i"
