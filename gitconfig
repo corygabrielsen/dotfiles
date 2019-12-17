@@ -99,6 +99,6 @@
 [merge]
     tool = vimdiff
 [user]
-	name = Cory Gabrielsen
+    name = Cory Gabrielsen
 [push]
-	default = simple
+    default = simple
