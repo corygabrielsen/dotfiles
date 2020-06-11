@@ -9,14 +9,6 @@ if [ -f ~/.zsh.oh-my-zsh ]; then
   source ~/.zsh.oh-my-zsh
 fi
 
-# pyenv
-# https://github.com/lablup/backend.ai/wiki/Install-Python-via-pyenv
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
-
-
 if [ -f ~/.zsh.setopt ]; then
     source ~/.zsh.setopt
 fi
