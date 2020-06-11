@@ -49,6 +49,8 @@
     pl = pull
 
     pu = push
+    puf = push -f
+    puu = push -u origin HEAD
 
     ss = show --summary
 

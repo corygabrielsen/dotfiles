@@ -78,6 +78,8 @@ alias gpl="git pl"
 
 # push
 alias gpu="git pu"
+alias gpuf="git puf"
+alias gpuu="git puu"
 
 # status
 alias gss="git ss"
