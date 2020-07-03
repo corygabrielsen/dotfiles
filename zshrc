@@ -7,6 +7,7 @@ fi
 # Read Oh-My-Zsh
 if [ -f ~/.zsh.oh-my-zsh ]; then
   source ~/.zsh.oh-my-zsh
+  unset GREP_OPTIONS
 fi
 
 if [ -f ~/.zsh.setopt ]; then
