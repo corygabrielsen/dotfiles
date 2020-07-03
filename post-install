@@ -15,6 +15,7 @@ sudo apt-get autoremove -y
 # Basic utilities
 sudo apt-get install -y \
   ack \
+  curl \
   git \
   tmux \
   vim
@@ -131,7 +132,24 @@ sudo snap install spotify                         # Spotify
 sudo snap install sublime-text         --classic  # Sublime Text 3
 ##################################################################
 
-
+# pyenv
+sudo apt-get install -y \
+    build-essential \
+    curl \
+    libbz2-dev \
+    libffi-dev \
+    liblzma-dev \
+    libncurses5-dev \
+    libncursesw5-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    libssl-dev \
+    llvm \
+    make \
+    tk-dev \
+    wget \
+    xz-utils \
+    zlib1g-dev
 [ -d $HOME/.pyenv ] || curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
 
 # Restart user to apply new shell
