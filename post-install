@@ -132,6 +132,7 @@ sudo snap install sublime-text         --classic  # Sublime Text 3
 ##################################################################
 
 
+[ -d $HOME/.pyenv ] || curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
 
 # Restart user to apply new shell
 su - ${USER}
