@@ -2,7 +2,7 @@
 
 set -o errexit
 set -o nounset
-
+set -x
 
 
 # Upgrade
@@ -12,36 +12,10 @@ sudo apt-get dist-upgrade -y
 sudo apt-get autoremove -y
 
 
-
 # Basic utilities
-sudo apt-get install -y vim
-
-
-
-##################################################################
-# zsh
-sudo apt-get install -y zsh
-
-# Dotfiles
-mkdir -p ~/dev
-pushd ~/dev
-rm -rf dotfiles && git clone git@github.com:stoooops/dotfiles.git
-pushd dotfiles
-./setup
-popd
-popd
-
-# configure local settings
-echo "[user]
-    email = corygabrielsen@gmail.com
-" > ~/.gitconfig.local
-
-# change shell, restart shell
-sudo chsh -s /usr/bin/zsh ${USER}
-su - ${USER}
-##################################################################
-
-
+sudo apt-get install -y \
+  git \
+  vim
 
 ##################################################################
 # Install OpenSSH
@@ -54,7 +28,46 @@ sudo ufw allow OpenSSH
 
 # Generate SSH key - https://stackoverflow.com/a/43235320
 ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y 2>&1 >/dev/null
-cat ~/.ssh/id_rsa.pub
+cat /home/coryg/.ssh/id_rsa.pub
+# Upload key to GitHub
+read -p "Uploaded ssh key to GitHub? " -n 1 -r
+echo    # (optional) move to a new line
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1 # handle exits from shell or function but don't exit interactive shell
+fi
+
+##################################################################
+
+
+
+##################################################################
+# zsh
+sudo apt-get install -y zsh
+
+# Dotfiles
+mkdir -p ~/dev
+pushd ~/dev
+rm -rf dotfiles && git clone --recursive git@github.com:stoooops/dotfiles.git
+pushd dotfiles
+./install-symlinks
+popd
+popd
+
+# configure local settings
+echo "[user]
+    email = corygabrielsen@gmail.com
+" > ~/.gitconfig.local
+
+# change shell, restart shell
+sudo chsh -s /usr/bin/zsh ${USER}
+# Restart user to apply new shell
+# su - ${USER}
+##################################################################
+
+
+
+##################################################################
 ##################################################################
 
 
@@ -79,9 +92,9 @@ sudo systemctl status docker
 # Add user to docker group
 sudo usermod -aG docker ${USER}
 # Restart to apply
-su - ${USER}
+# su - ${USER}
 # Show groups
-id -nG
+# id -nG
 ##################################################################
 
 
@@ -116,3 +129,6 @@ sudo snap install --classic sublime-text
 ##################################################################
 
 
+
+# Restart user to apply new shell
+su - ${USER}
