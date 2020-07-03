@@ -14,7 +14,9 @@ sudo apt-get autoremove -y
 
 # Basic utilities
 sudo apt-get install -y \
+  ack \
   git \
+  tmux \
   vim
 
 ##################################################################
@@ -26,9 +28,10 @@ sudo ufw enable
 # Allow OpenSSH
 sudo ufw allow OpenSSH
 
-# Generate SSH key - https://stackoverflow.com/a/43235320
-ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y 2>&1 >/dev/null
-cat /home/coryg/.ssh/id_rsa.pub
+# Generate SSH key - https://unix.stackexchange.com/a/135090 comments
+SSH_KEY_FILE=${HOME}/.ssh/id_rsa
+yes "" | ssh-keygen -N "" -f ${SSH_KEY_FILE} >&- 2>&- || echo "ssh key ${SSH_KEY_FILE} already exists"
+cat ${SSH_KEY_FILE}.pub
 # Upload key to GitHub
 read -p "Uploaded ssh key to GitHub? " -n 1 -r
 echo    # (optional) move to a new line
@@ -66,12 +69,6 @@ sudo chsh -s /usr/bin/zsh ${USER}
 ##################################################################
 
 
-
-##################################################################
-##################################################################
-
-
-
 ##################################################################
 # DOCKER
 # Next, install a few prerequisite packages which let apt use packages over HTTPS:
@@ -87,7 +84,7 @@ apt-cache policy docker-ce
 
 # Install docker
 sudo apt install -y docker-ce
-sudo systemctl status docker
+sudo systemctl status --no-pager -l docker
 
 # Add user to docker group
 sudo usermod -aG docker ${USER}
@@ -109,23 +106,29 @@ popd
 
 
 
-##################################################################
-# VS Code
-sudo snap install --classic code
-##################################################################
+#################################################################
+sudo apt-get install -y gimp
+sudo apt-get install -y kazam
+sudo apt-get install -y nautilus-dropbox
+sudo apt-get install -y unrar zip unzip
+sudo apt-get install -y virtualbox
+sudo apt-get install -y vlc
+
+# Shutter
+sudo add-apt-repository -y ppa:linuxuprising/shutter
+sudo apt install -y shutter
+#################################################################
 
 
 
 ##################################################################
-# PyCharm
-sudo snap install --classic pycharm-professional
-##################################################################
-
-
-
-##################################################################
-# Sublime Text
-sudo snap install --classic sublime-text
+# Snap apps
+sudo snap install atom                 --classic  # Atom
+sudo snap install code                 --classic  # VS code
+sudo snap install pycharm-professional --classic  # PyCharm
+sudo snap install slack                --classic  # Slack
+sudo snap install spotify                         # Spotify
+sudo snap install sublime-text         --classic  # Sublime Text 3
 ##################################################################
 
 
