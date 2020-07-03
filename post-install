@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+
+
+
+# Upgrade
+sudo apt-get update -y
+sudo apt-get upgrade -y
+sudo apt-get dist-upgrade -y
+sudo apt-get autoremove -y
+
+
+
+# Basic utilities
+sudo apt-get install -y vim
+
+
+
+##################################################################
+# zsh
+sudo apt-get install -y zsh
+
+# Dotfiles
+mkdir -p ~/dev
+pushd ~/dev
+rm -rf dotfiles && git clone git@github.com:stoooops/dotfiles.git
+pushd dotfiles
+./setup
+popd
+popd
+
+# configure local settings
+echo "[user]
+    email = corygabrielsen@gmail.com
+" > ~/.gitconfig.local
+
+# change shell, restart shell
+sudo chsh -s /usr/bin/zsh ${USER}
+su - ${USER}
+##################################################################
+
+
+
+##################################################################
+# Install OpenSSH
+sudo apt-get install -y openssh-server
+
+# Enable firewall
+sudo ufw enable
+# Allow OpenSSH
+sudo ufw allow OpenSSH
+
+# Generate SSH key - https://stackoverflow.com/a/43235320
+ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y 2>&1 >/dev/null
+cat ~/.ssh/id_rsa.pub
+##################################################################
+
+
+
+##################################################################
+# DOCKER
+# Next, install a few prerequisite packages which let apt use packages over HTTPS:
+sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+# Then add the GPG key for the official Docker repository to your system:
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+# Add the Docker repository to APT sources:
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+sudo apt update -y
+
+# Display docker to be downloaded
+apt-cache policy docker-ce
+
+# Install docker
+sudo apt install -y docker-ce
+sudo systemctl status docker
+
+# Add user to docker group
+sudo usermod -aG docker ${USER}
+# Restart to apply
+su - ${USER}
+# Show groups
+id -nG
+##################################################################
+
+
+
+##################################################################
+# Chrome
+pushd ~/Downloads
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo apt install ./google-chrome-stable_current_amd64.deb
+popd
+##################################################################
+
+
+
+##################################################################
+# VS Code
+sudo snap install --classic code
+##################################################################
+
+
+
+##################################################################
+# PyCharm
+sudo snap install --classic pycharm-professional
+##################################################################
+
+
+
+##################################################################
+# Sublime Text
+sudo snap install --classic sublime-text
+##################################################################
+
+
