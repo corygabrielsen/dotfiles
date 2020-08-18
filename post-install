@@ -18,6 +18,7 @@ sudo apt-get install -y \
   curl \
   git \
   jq \
+  nmap \
   tmux \
   vim
   
