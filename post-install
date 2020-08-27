@@ -17,6 +17,7 @@ sudo apt-get install -y \
   ack \
   curl \
   git \
+  htop \
   jq \
   nmap \
   tmux \
