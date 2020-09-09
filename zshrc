@@ -8,6 +8,8 @@ fi
 if [ -f ~/.zsh.oh-my-zsh ]; then
   source ~/.zsh.oh-my-zsh
   unset GREP_OPTIONS
+  # https://unix.stackexchange.com/a/436221
+  alias history="history -i"
 fi
 
 if [ -f ~/.zsh.setopt ]; then
