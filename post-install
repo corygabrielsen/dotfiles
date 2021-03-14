@@ -19,6 +19,7 @@ sudo apt-get install -y \
   git \
   htop \
   jq \
+  net-tools \
   nmap \
   tmux \
   vim
