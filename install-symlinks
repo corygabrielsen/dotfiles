@@ -1,7 +1,7 @@
 #!/bin/bash
 
 dev_dotfiles_dir="$HOME/dev/dotfiles"
-files=(aliases gitconfig git-template oh-my-zsh vim vimrc zsh.env zsh.functions zsh.oh-my-zsh zsh.setopt zsh.ssh zshrc)
+files=(aliases gitconfig git-template oh-my-zsh tmux.conf vim vimrc zsh.env zsh.functions zsh.oh-my-zsh zsh.setopt zsh.ssh zshrc)
 
 # Verify all files exist
 echo "Validating setup context..."
