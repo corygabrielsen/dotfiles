@@ -210,24 +210,6 @@ function printprocessesrow() {
 }
 
 #################################
-## Weather
-#################################
-function printweatherrow() {
-  printrowstart "Weather"
-  STOOOOPS_WEATHER_TIMEOUT_SECS=2
-  STOOOOPS_WEATHER_URL="http://www.accuweather.com/en/us/seattle-wa/98104/weather-forecast/351409"
-  STOOOOPS_WEATHER_WGET=`wget --timeout=$STOOOOPS_WEATHER_TIMEOUT_SECS -q -O- $STOOOOPS_WEATHER_URL`
-  STOOOOPS_WEATHER=` echo $STOOOOPS_WEATHER_WGET | awk -F\' '/acm_RecentLocationsCarousel\.push/{print $12"°F "$16}' | head -n 1`
-  DEGREE_SYMBOL="°"
-  if [ ${#DEGREE_SYMBOL} -eq 2 ]; then
-    endspaces=`for i in {${#STOOOOPS_WEATHER}..54}; do printf " "; done`
-    printf "%s%s\n" "$STOOOOPS_WEATHER" $endspaces
-  else
-    printrowend $STOOOOPS_WEATHER
-  fi
-}
-
-#################################
 ## Load Averages Table
 #################################
 function printloadaveragestable() {
@@ -295,7 +277,6 @@ function stats() {
   printloadaveragestable
   printemptyrow
 
-  printweatherrow
 #  printemptyrow
 
 #  printborderrow

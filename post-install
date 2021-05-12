@@ -4,7 +4,6 @@ set -o errexit
 set -o nounset
 set -x
 
-
 # Upgrade
 sudo apt-get update -y
 sudo apt-get upgrade -y
@@ -58,7 +57,7 @@ sudo apt-get install -y zsh
 # Dotfiles
 mkdir -p ~/dev
 pushd ~/dev
-rm -rf dotfiles && git clone --recursive git@github.com:stoooops/dotfiles.git
+test -d dotfiles || git clone --recursive git@github.com:stoooops/dotfiles.git
 pushd dotfiles
 ./install-symlinks
 popd
@@ -106,7 +105,7 @@ distribution=
 curl -s -L https://nvidia.github.io/nvidia-container-runtime/$(. /etc/os-release;echo $ID$VERSION_ID)/nvidia-container-runtime.list \
     | sudo tee /etc/apt/sources.list.d/nvidia-container-runtime.list
 sudo apt-get update -y
-sudo apt-get install -y nvidia-cont
+#sudo apt-get install -y nvidia-cont
 ##################################################################
 
 
