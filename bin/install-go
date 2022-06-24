@@ -3,14 +3,13 @@
 
 RED="\033[0;31m"
 GREEN="\033[0;32m"
-ORANGE='\033[0;33m'
+YELLOW='\033[0;33m'
 BLUE="\033[0;34m"
 CYAN="\033[1;36m"
-YELLOW="\033[1;33m"
-LIGHT_BLUE="\033[1;34m"
+BOLD_YELLOW="\033[1;33m"
 NC="\033[0m"
 
-PREFIX="${CYAN}[install-go]${NC} "
+PREFIX="${CYAN}[$(basename $0)]${NC} "
 
 DOWNLOADS=${HOME}/Downloads
 mkdir -p ${DOWNLOADS}
@@ -24,32 +23,35 @@ countdown() {
   secs=$1
   shift
   msg=$@
-  while [ $secs -gt 0 ]
+
+  printf "\r\033[K${PREFIX}${BOLD_YELLOW}${msg}${NC}"
+  sleep 1
+  while [ $secs -gt 1 ]
   do
-    printf "\r\033[K${PREFIX}${ORANGE}${msg} ($((secs--)))${NC}"
+    printf "\r\033[K${PREFIX}${BOLD_YELLOW}${msg} ($((--secs)))${NC}"
     sleep 1
   done
-  printf "\r\033[K${PREFIX}${ORANGE}${msg}${NC}"
+  printf "\r\033[K${PREFIX}${BOLD_YELLOW}${msg}${NC}"
   echo
 }
 
 if [ -d ${GO_INSTALL_DIR} ]; then
-	echo -e "${PREFIX}${YELLOW}Go already installed${NC}"
+	echo -e "${PREFIX}${BLUE}Go already installed${NC}"
 else
-	echo -e "${PREFIX}${LIGHT_BLUE}Installing Go...${NC}"
-	countdown 5 "Press ctrl-C to cancel..."
+	echo -e "${PREFIX}${BLUE}Installing Go...${NC}"
+	countdown 4 "Press ctrl-C to cancel..."
 	if [ ! -f ${GO_TAR_GZ_FILEPATH} ]; then
-		echo -e "${PREFIX}${LIGHT_BLUE}Downloading ${GO_TAR_GZ_URL} to ${GO_TAR_GZ_FILEPATH}${NC}"
+		echo -e "${PREFIX}${BLUE}Downloading ${GO_TAR_GZ_URL} to ${GO_TAR_GZ_FILEPATH}${NC}"
 		(set -x; wget -q -P ${DOWNLOADS} ${GO_TAR_GZ_URL})
 	else
-		echo -e "${PREFIX}${LIGHT_BLUE}Using cached ${GO_TAR_GZ_FILEPATH}${NC}"
+		echo -e "${PREFIX}${BLUE}Using cached ${GO_TAR_GZ_FILEPATH}${NC}"
 	fi
 	(set -x; sudo tar -C /usr/local -xz -f ${GO_TAR_GZ_FILEPATH})
 	echo -e "${PREFIX}${GREEN}Installed Go${NC}"
 fi
-echo -e "${PREFIX}${LIGHT_BLUE}${GO_INSTALL_DIR}${NC}"
+echo -e "${PREFIX}${BLUE}${GO_INSTALL_DIR}${NC}"
 
 GO_EXECUTABLE="${GO_INSTALL_DIR}/bin/go"
 (set -x; ${GO_EXECUTABLE} version)
 
-echo -e "${PREFIX}Done."
+echo -e "${PREFIX}${GREEN}Done.${NC}\n";

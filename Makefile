@@ -19,7 +19,7 @@ install: install_packages install_go
 ################################################################################
 
 install_packages:
-	sudo apt-get install -y < packages.txt
+	$(BIN)/install-packages
 
 
 
