@@ -1,6 +1,13 @@
 #!/bin/bash
 
-dev_dotfiles_dir="$HOME/dev/dotfiles"
+set -o errexit
+set -o nounset
+set -o pipefail
+
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+REPO_DIR=$(realpath "${SCRIPT_DIR}/..")
+
 files=(aliases gitconfig git-template oh-my-zsh tmux.conf vim vimrc zsh.env zsh.functions zsh.oh-my-zsh zsh.setopt zsh.ssh zshrc)
 
 # Verify all files exist
@@ -35,6 +42,6 @@ for file in "${files[@]}"; do
         echo "~/.$file does not exist"
     fi
     echo "Linking ~/.$file to $dir/$file"
-    ln -s $dev_dotfiles_dir/$file ~/.$file
+    ln -s ${REPO_DIR}/$file ~/.$file
     echo
 done
