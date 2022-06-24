@@ -87,8 +87,8 @@
     tool = vimdiff
 
 [hooks]
-    showwhitespaceerrors = true
-    removetrailingwhitespace = true
+    showwhitespaceerrors = false
+    removetrailingwhitespace = false
     removetrailingnewlines = false
 
 [include]
