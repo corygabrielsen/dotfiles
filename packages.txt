@@ -1,0 +1,14 @@
+ack
+build-essential
+curl
+git
+htop
+jq
+make
+net-tools
+nmap
+openssh-server
+tmux
+vim
+wget
+zsh

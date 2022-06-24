@@ -22,8 +22,6 @@ sudo apt-get install -y \
   nmap \
   tmux \
   vim
-  
-echo "set -g mouse on" > ~/.tmux.conf
 
 ##################################################################
 # Install OpenSSH
