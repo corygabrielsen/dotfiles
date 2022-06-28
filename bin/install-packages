@@ -25,6 +25,6 @@ cat ${PACKAGES_FILEPATH} | while read pkgname; do
     echo -e "${PREFIX}${BLUE}Installing ${pkgname}${NC}";
 done
 
-(set -x; sudo apt-get install -y < ${PACKAGES_FILEPATH})
+(set -x; sudo apt-get install -y $(< ${PACKAGES_FILEPATH}))
 
 echo -e "${PREFIX}${GREEN}Done.${NC}\n";
