@@ -62,6 +62,7 @@
     rbc = rebase --continue
     rbs = rebase --skip
 
+    reste = reset
     rs = reset
     rss = reset --soft
     rss1 = reset --soft \"HEAD^\"
