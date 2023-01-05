@@ -17,6 +17,10 @@ alias s="sudo"
 # Run Sublime Text in another session
 alias subl="setsid subl"
 
+# Copy standard input to clipboard and display on terminal.
+alias cntrlc='tee >(xclip -sel clip)'
+alias ctrlc='tee >(xclip -sel clip)'
+
 ##############################
 # Git
 ##############################
