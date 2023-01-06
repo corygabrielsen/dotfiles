@@ -8,7 +8,7 @@ set -o pipefail
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 REPO_DIR=$(realpath "${SCRIPT_DIR}/..")
 
-files=(aliases gitconfig git-template oh-my-zsh tmux.conf vim vimrc zsh.env zsh.functions zsh.oh-my-zsh zsh.setopt zsh.ssh zshrc)
+files=(aliases gitconfig git-template oh-my-zsh tmux.conf vim vimrc zsh.functions zsh.ssh zshrc)
 
 # Verify all files exist
 echo "Validating setup context..."

@@ -91,9 +91,20 @@ alias gpuu="git puu"
 
 # status
 alias gss="git ss"
-alias gst="git st"
+# check if in repo and run ls if not run `git status`
+gst() {
+    if [ -d .git ]; then
+        git status
+    else
+        echo "📁 $(pwd)"
+        ls --color=auto -Fh --group-directories-first
+        echo
+    fi
+}
 alias gstu="git stu"
 alias gsb="git sb"
+# typo
+alias gstg="git st"
 
 # rebase
 alias grb="git rb"

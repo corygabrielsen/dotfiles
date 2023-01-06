@@ -1,2 +1,9 @@
+# Configuration file for Vim's netrw file browsing plugin.
 vim/.netrwhist
+
+# swap files
 *.swp
+
+# IDE files
+.idea/
+.vscode/
