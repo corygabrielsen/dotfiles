@@ -18,8 +18,12 @@ alias s="sudo"
 alias subl="setsid subl"
 
 # Copy standard input to clipboard and display on terminal.
-alias cntrlc='tee >(xclip -sel clip)'
-alias ctrlc='tee >(xclip -sel clip)'
+ctrlc() {
+    tee >(xclip -sel clip) "$@" && echo "\n📋 Copied to clipboard"
+}
+cntrlc() {
+    ctrlc
+}
 
 ##############################
 # Git
