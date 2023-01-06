@@ -222,11 +222,6 @@ if [ -f ~/.zsh.functions ]; then
   source ~/.zsh.functions
 fi
 
-# Read ssh script
-if [ -f ~/.zsh.ssh ]; then
-  source ~/.zsh.ssh
-fi
-
 # Read local post-zshrc, if present
 if [ -f ~/.zshrc.local.after ]; then
   source ~/.zshrc.local.after

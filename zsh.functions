@@ -1,7 +1,3 @@
-# Define custom functions
-function gfind ()
-    find $2 -type f -exec grep -Hn --color=always $1 {} \;
-
 # Trim trailing whitespace
 function ttws ()
     cat $1 | sed -e 's/[[:blank:]]*$//'
@@ -26,12 +22,3 @@ function extract () {
         echo "'$1' is not a valid file"
     fi
 }
-
-# List the biggest install packages
-function list-largest-pkgs () {
-     dpkg-query --show --showformat='${Package;-50}\t${Installed-Size}\n' | sort -k 2 -n
-}
-
-if [ -f ~/.zsh.functions.local ]; then
-    source ~/.zsh.functions.local
-fi
