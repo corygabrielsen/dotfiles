@@ -1,6 +1,6 @@
-#
+###############################################################################
 # Options that enable or disable shell behavior:
-#
+###############################################################################
 
 # Save command history with timestamps and duration
 setopt extended_history
@@ -20,9 +20,9 @@ setopt share_history
 # Don't automatically change directories when entering a directory name
 unsetopt autocd
 
-#
+###############################################################################
 # Options that enable or disable shell prompts:
-#
+###############################################################################
 
 # Enable prompt string substitution
 setopt PROMPT_SUBST
@@ -66,10 +66,9 @@ setopt PROMPT_SUBST
 # unsetopt PROMPT_SUBST
 
 
-
-#
+###############################################################################
 # Configuring bindkey Utility
-#
+###############################################################################
 
 # Set default command line editing mode to vi
 # set editing-mode vi
@@ -95,9 +94,10 @@ bindkey -v
 # Set key binding for Ctrl-R to perform incremental search backward through command history
 bindkey '^R' history-incremental-search-backward
 
-#
-# Define colors
-#
+
+###############################################################################
+# UNIX commands
+###############################################################################
 
 RED="\033[0;31m"
 BRIGHT_RED="\033[1;31m"
@@ -226,3 +226,128 @@ fi
 if [ -f ~/.zshrc.local.after ]; then
   source ~/.zshrc.local.after
 fi
+
+###############################################################################
+# UNIX commands
+###############################################################################
+alias ls="ls -Fh"
+alias ll="ls -Flv"
+alias lla="ls -aFlv"
+
+alias cp="cp -i"
+alias mv="mv -i"
+alias rm="rm -i"
+
+###############################################################################
+# Git
+###############################################################################
+alias g="git"
+
+# add
+alias ga="git a"
+
+# branch
+alias gb="git b"
+alias gbm="git bm"
+
+# commit
+alias gc="git c"
+alias gca="git ca"
+alias gcm="git cm"
+alias gcam="git cam"
+alias gcamd="git camd"
+alias gacamd="git caamd"
+alias gamcamd="git camamd"
+
+# checkout
+alias gco="git co"
+
+# cherry-pick
+alias gcp="git cp"
+
+# diff
+alias gd="git d"
+alias gdc="git dc"
+alias gdcc="git dcc"
+alias gdh="git dh"
+alias gdnr="git dnr"
+alias gdw="git dw"
+alias gdwnr="git dwnr"
+
+# fetch
+alias gf="git f"
+
+# init
+alias gi="git i"
+
+# log
+alias gl="git l"
+alias gld="git ld"
+alias gldag="git ldag"
+alias glg="git lg"
+alias glga="git lga"
+alias glgd="git lgd"
+alias gll="git ll"
+alias glld="git lld"
+alias gls="git ls"
+
+# merge
+alias gm="git m"
+
+# pull
+alias gpl="git pl"
+
+# push
+alias gpu="git pu"
+alias gpuf="git puf"
+alias gpuu="git puu"
+
+# status
+alias gss="git ss"
+# check if in repo and run ls if not run `git status`
+gst() {
+    # check if in a git repo
+    # git rev-parse --git-dir 2>/dev/null ||
+    if [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" ]; then
+        git status
+    else
+        echo "📁 $(pwd)"
+        ls --color=auto -Fh --group-directories-first
+        echo
+    fi
+}
+alias gstu="git stu"
+alias gsb="git sb"
+# typo
+alias gstg="git st"
+
+# rebase
+alias grb="git rb"
+alias grbc="git rbc"
+alias grbs="git rbs"
+
+# reset
+alias grs="git rs"
+alias grss="git rss"
+alias grss1="git rss1"
+alias grss2="git rss2"
+alias grss3="git rss3"
+
+###############################################################################
+# Sublime Text
+###############################################################################
+
+# Run Sublime Text in another session
+alias subl="setsid subl"
+
+###############################################################################
+# Custom functions
+###############################################################################
+
+# Copy standard input to clipboard and display on terminal.
+ctrlc() {
+    tee >(xclip -sel clip) "$@" && echo "\n📋 Copied to clipboard"
+}
+cntrlc() {
+    ctrlc
+}
