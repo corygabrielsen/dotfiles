@@ -10,7 +10,7 @@
     b = branch
     bm = branch --move
 
-    c = commit --no-edit --verbose
+    c = commit --verbose
     ca = commit --all
     cm = commit --message
     cam = commit --all --message

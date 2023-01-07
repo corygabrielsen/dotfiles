@@ -55,15 +55,12 @@ export SAVEHIST=15000 # unique events guaranteed
 
 if [[ "${OSTYPE}" == "darwin"* ]]; then
     # macOS
-    echo "macOS detected"
     export DISPLAY=$(ipconfig getifaddr en0):0
 elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
     # Linux
-    echo "Linux detected"
     export DISPLAY=:0
 else
     # Unknown.
-    echo "Unknown OS detected"
     export DISPLAY=:0
 fi
 
@@ -76,7 +73,11 @@ fi
 # Source the API key file
 #
 
-source "${HOME}/.api_keys.env"
+# 1. -v '^#' removes all lines that start with a '#'
+# 2. xargs splits the lines into individual arguments
+# 3. export takes each argument and exports it as an environment variable
+export $(grep -v '^#' ~/.api_keys.env | xargs)
+
 
 
 ###############################################################################
@@ -334,7 +335,7 @@ bindkey '^R' history-incremental-search-backward
 # PS1 controls the prompt. It is set in zshrc since it is only sourced in
 # interactive shells.
 #
-echo "Setting PS1 prompt"
+
 # Display the current git branch
 parse_git_branch() {
     local branch_name="$(git symbolic-ref HEAD 2>/dev/null | cut -d"/" -f 3)"
