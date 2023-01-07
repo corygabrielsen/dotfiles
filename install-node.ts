@@ -7,21 +7,14 @@ interface Folders {
   [folder: string]: string[];
 }
 
-function getDotfilesRoot(): string {
-  return fs.realpathSync(path.resolve(__dirname));
-}
+const HOME: string =
+  process.env.HOME ||
+  (() => {
+    throw new Error("Environment variable HOME not set");
+  })();
+const FOLDERS: Folders = JSON.parse(fs.readFileSync("folders.json", "utf8"));
 
-const FOLDERS: Folders = {
-  git: ["gitconfig", "git-template"],
-  tmux: ["tmux.conf"],
-  vim: ["vim", "vimrc"],
-  zsh: ["zshenv", "zprofile", "zshrc"],
-};
-
-const HOME = process.env.HOME;
-if (!HOME) throw new Error("Environment variable HOME not set");
-
-const DOTFILES_REPO_ROOT = getDotfilesRoot();
+const DOTFILES_REPO_ROOT = fs.realpathSync(path.resolve(__dirname));
 
 for (const [folder, files] of Object.entries(FOLDERS)) {
   for (const file of files) {

@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
+import json
 import os
 from typing import Dict, List
+
+HOME: str = os.environ["HOME"]
+FOLDERS: Dict[str, List[str]] = json.load(open("folders.json"))
 
 
 def get_dotfiles_root() -> str:
@@ -14,20 +18,6 @@ def get_dotfiles_root() -> str:
     # Use os.path.realpath to resolve any symlinks in the path
     return os.path.realpath(path)
 
-
-FOLDERS: Dict[str, List[str]] = {
-    "git": ["gitconfig", "git-template"],
-    "tmux": ["tmux.conf"],
-    "vim": ["vim", "vimrc"],
-    "zsh": ["zshenv", "zprofile", "zshrc"],
-}
-
-# os.environ is a dictionary containing the user's environment variables
-# get the value of the HOME environment variable, or throw an error if it is not set
-try:
-    HOME = os.environ["HOME"]
-except KeyError:
-    raise Exception("Environment variable HOME not set")
 
 DOTFILES_REPO_ROOT: str = get_dotfiles_root()
 
