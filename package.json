@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "This is a dotfiles repository",
   "scripts": {
-    "install": "python3 -m install"
+    "install": "git submodule update --init --recursive && python3 -m install"
   },
   "repository": "git@github.com:stoooops/dotfiles.git",
   "author": "Cory Gabrielsen",

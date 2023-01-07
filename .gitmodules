@@ -1,0 +1,3 @@
+[submodule "potpourri"]
+	path = potpourri
+	url = git@github.com:stoooops/potpourri.git
