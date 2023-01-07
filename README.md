@@ -13,12 +13,10 @@ tools and applications.
 
 ## Installation
 
-To install these dotfiles, clone the repository and run the `install.sh` script:
+To install these dotfiles, clone the repository and run:
 
 ```bash
-git clone https://github.com/user/dotfiles.git
-cd dotfiles
-./install.sh
+yarn install
 ```
 
 This will create symlinks for the dotfiles in the repository, linking them to
