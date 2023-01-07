@@ -164,7 +164,7 @@ gst() {
     # check if in a git repo
     # git rev-parse --git-dir 2>/dev/null ||
     if [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" ]; then
-        git status
+        git st
     else
         echo "📁 $(pwd)"
         ls --color=auto -Fh --group-directories-first
