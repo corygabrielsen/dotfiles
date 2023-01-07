@@ -1,3 +1,6 @@
+api_keys.env
+.prompt
+
 # Configuration file for Vim's netrw file browsing plugin.
 vim/.netrwhist
 

@@ -1,0 +1,44 @@
+#!/usr/bin/env zsh
+#
+# The ~/.zprofile file is a configuration file for the Z shell (zsh) that is
+# sourced (executed) when you log in to the system. It is used to define
+# settings, aliases, and functions that should be set when you log in to the
+# system.
+#
+# This file should not contain commands, options, or keybindings that produce
+# output or modify the shell. It is intended to be used to set environment
+# variables, aliases, functions, and commands. Options and keybindings should
+# be set in the ~/.zshrc file.
+#
+# To use the ~/.zprofile file, you can create a symlink to the file in your
+# home directory using the ln command:
+#
+#   ln -s path/to/dotfiles/zsh/zprofile ~/.zprofile
+#
+
+
+
+################################################################################
+# Environment
+################################################################################
+export HOSTNAME=$(uname -n)
+
+
+
+################################################################################
+# pyenv
+################################################################################
+#
+# This is the recommended way to set up Pyenv in your shell.
+#
+# bash
+# https://github.com/pyenv/pyenv/issues/1906#issuecomment-835027647
+#
+# zsh
+# https://github.com/pyenv/pyenv/issues/1906#issuecomment-839556656
+#
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+if command -v pyenv 1>/dev/null 2>&1; then
+  eval "$(pyenv init --path)"
+fi
