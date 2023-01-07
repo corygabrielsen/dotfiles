@@ -20,7 +20,7 @@ PREFIX="${CYAN}[$(basename $0)]${NC} "
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 REPO_DIR=$(realpath "${SCRIPT_DIR}/..")
 
-PACKAGES_FILEPATH=${REPO_DIR}/packages.txt
+PACKAGES_FILEPATH=${REPO_DIR}/apt-get/packages.txt
 cat ${PACKAGES_FILEPATH} | while read pkgname; do
     echo -e "${PREFIX}${BLUE}Installing ${pkgname}${NC}";
 done
