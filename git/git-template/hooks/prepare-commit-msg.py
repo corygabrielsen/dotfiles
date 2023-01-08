@@ -119,98 +119,7 @@ def add_repo_root_to_pythonpath(log=False) -> None:
 add_repo_root_to_pythonpath()
 from potpourri.python.openai.client import OpenAIApiClient  # noqa: E402
 from potpourri.python.openai.commit_message import CommitMessage  # noqa: E402
-
-
-def get_prompt(model: str, status_text: str, diff_text: str) -> str:
-    return f"""
-I want you to act as a technical writer for software engineers, your
-primary responsibility is to write clear and concise commit messages
-for code changes. Your job is to communicate the purpose and impact
-of code changes to other members of the development team.
-
-A good commit message has the following characteristics:
-- It is concise and accurate.
-- It is written in the imperative mood and begins with a verb
-- It explains why the change was made, rather than how it was made.
-- It includes a signature at the end of the message.
-
-Here is an example of a good commit message:
-```
-🤖 Ensure non-empty password during login
-
-The login form was submitting even if the password field was empty.
-This commit fixes the bug by checking that the password field is not
-empty before allowing the form to be submitted.
-
-
-(commit message written by OpenAI {model})
-```
-
-Here is an example of a good commit message:
-```text
-🤖 Include latest dependencies for eslint, prettier
-
-Updates the package.json file to include the latest
-dependencies for prettier and eslint for code formatting.
-
-prettier is a code formatter that automatically formats code to
-conform to a consistent style. It is configured to use the
-recommended settings for the JavaScript Standard Style.
-
-eslint is a linter that checks for common errors and code smells.
-It is configured to use the recommended settings for the
-JavaScript Standard Style.
-
-
-(commit message written by OpenAI {model})
-```
-
-Some other tips for writing good commit messages:
-- Begin with "🤖 "
-- Keep the subject line (the first line) to 50 characters or less
-- Separate subject from body with a blank line
-- Use the body of the message to explain the details of the commit
-- Wrap the body at 72 characters                              like this
-- Avoid words like "Update", "Refactor", "Fix", "Add", "Remove" in the
-    subject line
-
-At the end of the commit message, add two blank lines followed by a
-signature:
-```text
-(commit message written by OpenAI {model})
-```
-
-Your first task is to review staged changes and suggest a commit
-message for the latest patch.
-
-Files changed:
-```
-// git status -s
-{status_text}
-```
-
-Files diff:
-```diff
-// git diff --cached --no-color --no-ext-diff --unified=0 --no-prefix
-{diff_text}
-```
-
-Choose a unique and stylish first line in the imperative tense
-that concisely describes the changes made in the commit.
-This line should be no more than 50 characters.
-
-Now, please write a suggested commit message below that is clear,
-concise, and colorful, following the rules described above,
-beginning with "🤖 " and ending with the signature
-"(commit message written by OpenAI {model})":
-
-Respond with:
-- A detailed paragraph explaining WHY the changes were made
-- Ten unique, stylish, colorful, and concise subject lines
-- A suggested commit message enclosed in ```text ... ```
-
-Detailed explanation:
-"""
+from potpourri.python.openai.prompt_builder import PromptBuilder  # noqa: E402
 
 
 def is_exists_empty_file(path: str) -> bool:
@@ -236,9 +145,13 @@ def check_abort(args: Namespace) -> None:
     If the commit message file is not empty, print a message and exit.
     If the OPENAI_API_KEY environment variable is not set, print an error message in red and exit.
     """
+
     # Check if the commit message file is not empty
-    if not is_exists_empty_file(args.msg_file):
+    if os.path.exists(args.msg_file) and not is_exists_empty_file(args.msg_file):
         # Commit message already specified earlier in the commit process
+        print("Commit message already specified earlier in the commit process")
+        print(f"Message is in {args.msg_file}")
+        print("Exit 0")
         exit(0)
 
     # Check if the OPENAI_API_KEY environment variable is not set
@@ -332,17 +245,17 @@ def get_diff_text(excluded=["package-lock.json", "yarn.lock"]) -> str:
 
 def parse_args() -> Namespace:
     """
-        prepare-commit-msg
+            prepare-commit-msg
 
-    This hook is invoked by git-commit[1] right after preparing the default log message, and before the editor is started.
+        This hook is invoked by git-commit[1] right after preparing the default log message, and before the editor is started.
 
-    It takes one to three parameters. The first is the name of the file that contains the commit log message. The second is the source of the commit message, and can be: message (if a -m or -F option was given); template (if a -t option was given or the configuration option commit.template is set); merge (if the commit is a merge or a .git/MERGE_MSG file exists); squash (if a .git/SQUASH_MSG file exists); or commit, followed by a commit object name (if a -c, -C or --amend option was given).
+        It takes one to three parameters. The first is the name of the file that contains the commit log message. The second is the source of the commit message, and can be: message (if a -m or -F option was given); template (if a -t option was given or the configuration option commit.template is set); merge (if the commit is a merge or a .git/MERGE_MSG file exists); squash (if a .git/SQUASH_MSG file exists); or commit, followed by a commit object name (if a -c, -C or --amend option was given).
+    `
+        If the exit status is non-zero, git commit will abort.
 
-    If the exit status is non-zero, git commit will abort.
+        The purpose of the hook is to edit the message file in place, and it is not suppressed by the --no-verify option. A non-zero exit means a failure of the hook and aborts the commit. It should not be used as replacement for pre-commit hook.
 
-    The purpose of the hook is to edit the message file in place, and it is not suppressed by the --no-verify option. A non-zero exit means a failure of the hook and aborts the commit. It should not be used as replacement for pre-commit hook.
-
-    The sample prepare-commit-msg hook that comes with Git removes the help message found in the commented portion of the commit template.
+        The sample prepare-commit-msg hook that comes with Git removes the help message found in the commented portion of the commit template.
     """
     parser = ArgumentParser(description="prepare-commit-msg")
     parser.add_argument(
@@ -358,6 +271,14 @@ def main() -> None:
     Use the OpenAI API to get a suggested commit message for the diff that is about to be committed.
     """
     args = parse_args()
+
+    # check environment variable specifying whether to continue or now
+    OPENAI_GIT_COMMIT_MESSAGE = os.environ.get("OPENAI_GIT_COMMIT_MESSAGE")
+    if OPENAI_GIT_COMMIT_MESSAGE != "true":
+        print("OPENAI_GIT_COMMIT_MESSAGE is not true, exiting")
+        return
+
+    # time.sleep(5)
     # Check if the commit should be aborted
     check_abort(args)
 
@@ -369,7 +290,8 @@ def main() -> None:
     model: str = "text-davinci-003"
 
     # Get the prompt
-    prompt: str = get_prompt(
+    prompt_builder = PromptBuilder()
+    prompt: str = prompt_builder.get_prompt(
         model=model, status_text=git_status_text, diff_text=git_diff_text
     )
     # save prompt to debug file
@@ -382,11 +304,11 @@ def main() -> None:
         OpenAIApiClient().get_suggested_commit_message(prompt=prompt, model=model)
     )
     # delete the commit message file
-    os.remove(sys.argv[1])
+    os.remove(args.msg_file)
 
     # directly run gitf  commit -m "suggested_commit_message"
     # write commit message to file
-    with open(sys.argv[1], "w") as f:
+    with open(args.msg_file, "w") as f:
         f.write(suggested_commit_message.text)
 
     print()
