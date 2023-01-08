@@ -21,15 +21,21 @@ def get_dotfiles_root() -> str:
 
 DOTFILES_REPO_ROOT: str = get_dotfiles_root()
 
-for folder, files in FOLDERS.items():
-    for file in files:
-        src: str = f"{DOTFILES_REPO_ROOT}/{folder}/{file}"
-        dest: str = f"{HOME}/.{file}"
 
-        try:
-            os.unlink(dest)
-        except FileNotFoundError:
-            pass
+def main() -> None:
+    for folder, files in FOLDERS.items():
+        for file in files:
+            src: str = f"{DOTFILES_REPO_ROOT}/{folder}/{file}"
+            dest: str = f"{HOME}/.{file}"
 
-        print(f"{src} -> {dest}")
-        os.symlink(src, dest)
+            try:
+                os.unlink(dest)
+            except FileNotFoundError:
+                pass
+
+            print(f"{src} -> {dest}")
+            os.symlink(src, dest)
+
+
+if __name__ == "__main__":
+    main()
