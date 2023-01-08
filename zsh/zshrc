@@ -58,7 +58,7 @@ if [[ "${OSTYPE}" == "darwin"* ]]; then
     export DISPLAY=$(ipconfig getifaddr en0):0
 elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
     # Linux
-    export DISPLAY=:0
+    # export DISPLAY=:0
 else
     # Unknown.
     export DISPLAY=:0
@@ -476,6 +476,30 @@ extract() {
     fi
 }
 
+
+# 1. Find all files and directories under the current directory, sorted alphabetically
+# 2. Replace the "." with the basename of the current directory
+# 3. Append a "/" to the end of each directory name
+dump() {
+  find . -type f -o -type d |
+  sort |
+  awk '{
+    # If the line ends in "/", print the line with a "/" appended
+    if (system("[ -d \"" $1 "\" ]") == 0) {
+      print $1 "/"
+    }
+    # If the line does not end in "/", print the line with a "?" appended
+    else {
+      print $1 ""
+    }
+  }' |
+  sed "s|^\.|$(basename "$(pwd)")|"
+}
+
+srcdump() {
+  dump |
+  grep -vE "(.git|build|cache|coverage|dist|log|logs|node_modules|out|site|tmp|venv)"
+}
 
 
 ################################################################################

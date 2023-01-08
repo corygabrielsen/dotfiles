@@ -27,7 +27,7 @@ for (const [folder, files] of Object.entries(FOLDERS)) {
       // do nothing
     }
 
-    console.log(`${src} -> ${dest}`);
+    console.log(`${dest} -> ${src}`);
     fs.symlinkSync(src, dest);
   }
 }
