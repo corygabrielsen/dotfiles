@@ -4,6 +4,9 @@ api_keys.env
 .DS_Store
 node_modules
 
+# for now
+prompts
+
 *.pyc
 
 # Configuration file for Vim's netrw file browsing plugin.
