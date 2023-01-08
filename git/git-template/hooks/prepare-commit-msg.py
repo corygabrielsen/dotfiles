@@ -35,6 +35,7 @@ would call prepare-commit-msg with the following parameters:
 import os
 import subprocess
 import sys
+from argparse import ArgumentParser, Namespace
 
 
 # a very robust function to check if we are inside the root of the potpourri repo
@@ -228,14 +229,15 @@ def is_exists_empty_file(path: str) -> bool:
     return True
 
 
-def check_abort() -> None:
+def check_abort(args: Namespace) -> None:
     """
     Check if the commit message file is not empty or if the OPENAI_API_KEY environment variable is not set.
 
     If the commit message file is not empty, print a message and exit.
     If the OPENAI_API_KEY environment variable is not set, print an error message in red and exit.
     """
-    if not is_exists_empty_file(sys.argv[1]):
+    # Check if the commit message file is not empty
+    if not is_exists_empty_file(args.msg_file):
         # Commit message already specified earlier in the commit process
         exit(0)
 
@@ -328,12 +330,36 @@ def get_diff_text(excluded=["package-lock.json", "yarn.lock"]) -> str:
     return output
 
 
+def parse_args() -> Namespace:
+    """
+        prepare-commit-msg
+
+    This hook is invoked by git-commit[1] right after preparing the default log message, and before the editor is started.
+
+    It takes one to three parameters. The first is the name of the file that contains the commit log message. The second is the source of the commit message, and can be: message (if a -m or -F option was given); template (if a -t option was given or the configuration option commit.template is set); merge (if the commit is a merge or a .git/MERGE_MSG file exists); squash (if a .git/SQUASH_MSG file exists); or commit, followed by a commit object name (if a -c, -C or --amend option was given).
+
+    If the exit status is non-zero, git commit will abort.
+
+    The purpose of the hook is to edit the message file in place, and it is not suppressed by the --no-verify option. A non-zero exit means a failure of the hook and aborts the commit. It should not be used as replacement for pre-commit hook.
+
+    The sample prepare-commit-msg hook that comes with Git removes the help message found in the commented portion of the commit template.
+    """
+    parser = ArgumentParser(description="prepare-commit-msg")
+    parser.add_argument(
+        "msg_file", help="The name of the file that contains the commit log message."
+    )
+    parser.add_argument("source", help="The source of the commit message.")
+    parser.add_argument("commit", help="The commit object name.")
+    return parser.parse_args()
+
+
 def main() -> None:
     """
     Use the OpenAI API to get a suggested commit message for the diff that is about to be committed.
     """
+    args = parse_args()
     # Check if the commit should be aborted
-    check_abort()
+    check_abort(args)
 
     # Get the status text and diff text for the staged changes in the
     # current Git repository
