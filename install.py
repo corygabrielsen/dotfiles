@@ -4,8 +4,20 @@ import json
 import os
 from typing import Dict, List
 
-HOME: str = os.environ["HOME"]
+HOME: str = os.path.expanduser("~")
 FOLDERS: Dict[str, List[str]] = json.load(open("folders.json"))
+
+
+def longest(folders: Dict[str, List[str]]) -> int:
+    """
+    Returns the length of the longest folder + file name combo
+    """
+    return max(
+        [len(f"{HOME}/.{file}") for folder, files in folders.items() for file in files]
+    )
+
+
+LJUST = longest(FOLDERS)
 
 
 def get_dotfiles_root() -> str:
@@ -33,7 +45,7 @@ def main() -> None:
             except FileNotFoundError:
                 pass
 
-            print(f"{dest.ljust(23)} ---> {src}")
+            print(f"{dest.ljust(LJUST)} ---> {src}")
             os.symlink(src, dest)
 
 
