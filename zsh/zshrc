@@ -129,6 +129,10 @@ alias gdnr="git dnr"
 alias gdw="git dw"
 alias gdwnr="git dwnr"
 
+# commons typos for QWERTY users
+alias gdcf="git dc"
+alias gdcv="git dc"
+
 # fetch
 alias gf="git f"
 
