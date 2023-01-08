@@ -130,6 +130,7 @@ alias gdw="git dw"
 alias gdwnr="git dwnr"
 
 # commons typos for QWERTY users
+alias gsdc="git dc"
 alias gdcf="git dc"
 alias gdcv="git dc"
 
