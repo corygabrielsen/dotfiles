@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Configuration File Colors and Files",
+  "type": "object",
+  "properties": {
+    "git": {
+      "type": "object",
+      "description": "Configuration for git tool",
+      "properties": {
+        "colorize": {
+          "type": "string",
+          "description": "Color used to display git-related files in terminal"
+        },
+        "files": {
+          "type": "array",
+          "description": "List of git-related files",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "tmux": {
+      "type": "object",
+      "description": "Configuration for tmux tool",
+      "properties": {
+        "colorize": {
+          "type": "string",
+          "description": "Color used to display tmux-related files in terminal"
+        },
+        "files": {
+          "type": "array",
+          "description": "List of tmux-related files",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "vim": {
+      "type": "object",
+      "description": "Configuration for vim text editor",
+      "properties": {
+        "colorize": {
+          "type": "string",
+          "description": "Color used to display vim-related files in terminal"
+        },
+        "files": {
+          "type": "array",
+          "description": "List of vim-related files",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "zsh": {
+      "type": "object",
+      "description": "Configuration for zsh shell",
+      "properties": {
+        "colorize": {
+          "type": "string",
+          "description": "Color used to display zsh-related files in terminal"
+        },
+        "files": {
+          "type": "array",
+          "description": "List of zsh-related files",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

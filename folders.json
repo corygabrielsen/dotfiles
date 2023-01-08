@@ -1,6 +1,0 @@
-{
-  "git": ["gitconfig", "git-template"],
-  "tmux": ["tmux.conf"],
-  "vim": ["vim", "vimrc"],
-  "zsh": ["zshenv", "zprofile", "zshrc"]
-}

@@ -1,0 +1,18 @@
+{
+  "git": {
+    "colorize": "blue",
+    "files": ["gitconfig", "git-template"]
+  },
+  "tmux": {
+    "colorize": "green",
+    "files": ["tmux.conf"]
+  },
+  "vim": {
+    "colorize": "orange",
+    "files": ["vim", "vimrc"]
+  },
+  "zsh": {
+    "colorize": "purple",
+    "files": ["zshenv", "zprofile", "zshrc"]
+  }
+}
