@@ -15,6 +15,20 @@ This hook is invoked by Git just before the commit message editor is launched,
 and it is passed the name of the file that holds the commit message.
 The hook should edit this file in place and then exit.
 If the hook exits non-zero, Git aborts the commit process.
+
+prepare-commit-msg is called with three parameters:
+- [path] the path to the file that holds the commit message.
+- [commit type] the type of commit, i.e. "commit", "amend", or "merge".
+- [commit sha1] the SHA-1 of the commit that is being created.
+
+For example,
+
+$ git commit -m "Initial commit"
+
+would call prepare-commit-msg with the following parameters:
+- [path] .git/COMMIT_EDITMSG
+- [commit type] commit
+- [commit sha1] N/A
 """
 
 
