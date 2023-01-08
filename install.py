@@ -33,7 +33,7 @@ def main() -> None:
             except FileNotFoundError:
                 pass
 
-            print(f"{dest} -> {src}")
+            print(f"{dest.ljust(23)} ---> {src}")
             os.symlink(src, dest)
 
 
