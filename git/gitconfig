@@ -65,6 +65,7 @@
     reste = reset
     rest = reset
     rs = reset
+    rh = reset HEAD
     rss = reset --soft
     rss1 = reset --soft \"HEAD^\"
     rss2 = reset --soft \"HEAD^^\"
