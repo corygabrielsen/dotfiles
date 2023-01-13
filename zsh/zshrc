@@ -92,6 +92,8 @@ alias lla="ls -aFlv"
 alias mv="mv -i"
 alias rm="rm -i"
 
+# typo
+alias cvd=cd
 
 
 ###############################################################################
@@ -499,7 +501,7 @@ dump() {
 
 srcdump() {
   dump |
-  grep -vE "(.git|build|cache|coverage|dist|log|logs|node_modules|out|site|tmp|venv)"
+  grep -vE "(.git|.next|build|cache|coverage|dist|log|logs|node_modules|out|site|tmp|venv)"
 }
 
 
