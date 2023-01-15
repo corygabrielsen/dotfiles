@@ -76,7 +76,7 @@ fi
 # 1. -v '^#' removes all lines that start with a '#'
 # 2. xargs splits the lines into individual arguments
 # 3. export takes each argument and exports it as an environment variable
-export $(grep -v '^#' ~/.api_keys.env | xargs)
+export $(grep -v '^#' ~/.api_keys.env | xargs) > /dev/null
 
 
 
