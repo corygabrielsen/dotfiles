@@ -36,6 +36,12 @@ Install yarn
 ```bash
 sudo npm install -g yarn
 ```
+Install zsh
+```bash
+sudo apt install -y zsh
+chsh -s $(which zsh)
+# logout / login
+```
 
 Then run the above instructions like normal.
 # Customization
