@@ -17,11 +17,27 @@ To install these dotfiles, clone the repository and run:
 
 ```bash
 yarn install
+yarn setup
 ```
 
-This will create symlinks for the dotfiles in the repository, linking them to
-the appropriate locations in your home directory.
+This will install dependencies and create symlinks for the dotfiles in the repository,
+linking them to the appropriate locations in your home directory.
 
+### Fresh install
+From a new computer, install git
+```bash
+sudo apt install -y git
+```
+Install npm
+```bash
+sudo apt install -y npm
+```
+Install yarn
+```bash
+sudo npm install -g yarn
+```
+
+Then run the above instructions like normal.
 # Customization
 
 Feel free to use and customize these dotfiles as you see fit. If you make any
