@@ -62,9 +62,9 @@ else
     # Setup docker in rootless mode
     # 1. Install system requirements
     sudo sh -eux <<EOF
-    # Install newuidmap & newgidmap binaries
-    apt-get install -y uidmap
-    EOF
+# Install newuidmap & newgidmap binaries
+apt-get install -y uidmap
+EOF
     # 2. setting up the Docker daemon in rootless mode for your user
     dockerd-rootless-setuptool.sh install
     docker run hello-world
