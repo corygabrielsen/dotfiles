@@ -22,29 +22,12 @@ sudo apt-get autoremove
 # basic utilities
 sudo apt-get install -y curl
 sudo apt-get install -y git
-sudo apt-get install -y npm
 sudo apt-get remove -y nodejs-doc nodejs
 curl -s https://deb.nodesource.com/setup_16.x | sudo bash
 sudo apt-get install -y nodejs
 sudo npm install -g yarn
 sudo apt-get install -y zsh
 chsh -s $(which zsh)
-
-# docker
-# https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo bash get-docker.sh
-sudo docker run hello-world
-
-# Setup docker in rootless mode
-# 1. Install system requirements
-sudo sh -eux <<EOF
-# Install newuidmap & newgidmap binaries
-apt-get install -y uidmap
-EOF
-# 2. setting up the Docker daemon in rootless mode for your user
-dockerd-rootless-setuptool.sh install
-docker run hello-world
 
 
 # Install GitHub CLI
@@ -66,3 +49,18 @@ yarn setup
 popd
 popd
  
+# docker
+# https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo bash get-docker.sh
+sudo docker run hello-world
+
+# Setup docker in rootless mode
+# 1. Install system requirements
+sudo sh -eux <<EOF
+# Install newuidmap & newgidmap binaries
+apt-get install -y uidmap
+EOF
+# 2. setting up the Docker daemon in rootless mode for your user
+dockerd-rootless-setuptool.sh install
+docker run hello-world
