@@ -51,16 +51,21 @@ popd
  
 # docker
 # https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo bash get-docker.sh
-sudo docker run hello-world
+if [ -f /.dockerenv ]; then
+    echo "Running inside docker. Skipping docker-in-docker install."
+else
+    echo "Installing docker..."
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sudo bash get-docker.sh
+    sudo docker run hello-world
 
-# Setup docker in rootless mode
-# 1. Install system requirements
-sudo sh -eux <<EOF
-# Install newuidmap & newgidmap binaries
-apt-get install -y uidmap
-EOF
-# 2. setting up the Docker daemon in rootless mode for your user
-dockerd-rootless-setuptool.sh install
-docker run hello-world
+    # Setup docker in rootless mode
+    # 1. Install system requirements
+    sudo sh -eux <<EOF
+    # Install newuidmap & newgidmap binaries
+    apt-get install -y uidmap
+    EOF
+    # 2. setting up the Docker daemon in rootless mode for your user
+    dockerd-rootless-setuptool.sh install
+    docker run hello-world
+fi
