@@ -23,7 +23,7 @@ sudo apt-get autoremove
 sudo apt-get install -y curl
 sudo apt-get install -y git
 sudo apt-get install -y npm
-sudo apt-get remove -y nodejs
+sudo apt-get remove -y nodejs-doc nodejs
 curl -s https://deb.nodesource.com/setup_16.x | sudo bash
 sudo apt-get install -y nodejs
 sudo npm install -g yarn
