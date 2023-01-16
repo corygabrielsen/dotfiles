@@ -35,33 +35,46 @@ sudo apt-get install -y \
   tmux \
   vim
   
-# Install OpenSSH
+# OpenSSH
 sudo apt-get install -y openssh-server
 
-# Install NodeJS
+# NodeJS
 curl -s https://deb.nodesource.com/setup_16.x | sudo bash
 sudo apt-get install -y nodejs
+
+# Yarn
 sudo npm install -g yarn
+
+# Zsh
 sudo apt-get install -y zsh
 chsh -s $(which zsh)
 
 
-# Install GitHub CLI
+# GitHub CLI
 # https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian-ubuntu-linux-raspberry-pi-os-apt
 type -p gh >/dev/null || curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
   && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
   && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
   && sudo apt update \
-  && sudo apt install gh -y \
-  && gh auth login --web --git-protocol ssh
- 
-# download dotfiles
+  && sudo apt install gh -y
+if [ ! -f /.dockerenv ]; then
+  gh auth login --web --git-protocol ssh
+fi
+
+# ~/code
 mkdir -p ~/code
 pushd ~/code
-git clone --recursive git@github.com:stoooops/dotfiles.git
+
+# ~/code/dotfiles
+if [ -f /.dockerenv ]; then
+  git clone https://github.com/stoooops/dotfiles.git
+else
+  git clone --recursive git@github.com:stoooops/dotfiles.git
+fi
 pushd dotfiles
 yarn install
 yarn setup
+
 popd
 popd
 
