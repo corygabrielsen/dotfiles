@@ -47,7 +47,7 @@ sudo npm install -g yarn
 
 # Zsh
 sudo apt-get install -y zsh
-chsh -s $(which zsh)
+sudo chsh -s $(which zsh) $(whoami)
 
 
 # GitHub CLI
