@@ -1,19 +1,59 @@
 #!/bin/bash
 
+set -x
 sudo apt-get update
 
 echo "Fixing Ubuntu 22.04.1 broken installer..."
 sudo ubuntu-drivers autoinstall
-sudo apt-get install ubuntu-restricted-addons
+sudo apt-get install -y ubuntu-restricted-addons
 sudo apt-get upgrade -y gnome-remote-desktop
-
 sudo apt-get upgrade -y
-
-# again not sure
 sudo apt-get dist-upgrade -y
+
+# basic utilities
+sudo apt install -y curl
+sudo apt install -y git
+sudo apt install -y npm
+sudo apt remove nodejs
+curl -s https://deb.nodesource.com/setup_16.x | sudo bash
+sudo apt install -y nodejs
+sudo npm install -g yarn
+sudo apt install -y zsh
+chsh -s $(which zsh)
 
 # docker
 # https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script
 curl -fsSL https://get.docker.com -o get-docker.sh
-sudo get-docker.sh
+sudo bash get-docker.sh
 sudo docker run hello-world
+
+# Setup docker in rootless mode
+# 1. Install system requirements
+sudo sh -eux <<EOF
+# Install newuidmap & newgidmap binaries
+apt-get install -y uidmap
+EOF
+# 2. setting up the Docker daemon in rootless mode for your user
+dockerd-rootless-setuptool.sh install
+docker run hello-world
+
+
+# Install GitHub CLI
+# https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian-ubuntu-linux-raspberry-pi-os-apt
+type -p gh >/dev/null || curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+  && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+  && sudo apt update \
+  && sudo apt install gh -y
+  && gh auth login --web --git-protocol ssh
+ 
+ # download dotfiles
+ mkdir -p ~/code
+ pushd ~/code
+ git clone --recursive git@github.com:stoooops/dotfiles.git
+ pushd dotfiles
+ yarn install
+ yarn setup
+ popd
+ popd
+ 
