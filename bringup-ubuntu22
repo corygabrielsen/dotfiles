@@ -15,7 +15,7 @@ sudo apt-get dist-upgrade -y
 sudo apt install -y curl
 sudo apt install -y git
 sudo apt install -y npm
-sudo apt remove nodejs
+sudo apt remove -y nodejs
 curl -s https://deb.nodesource.com/setup_16.x | sudo bash
 sudo apt install -y nodejs
 sudo npm install -g yarn
