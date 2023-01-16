@@ -1,11 +1,19 @@
 #!/bin/bash
 
-echo "Fixing Ubuntu 22.04.1 broken installer..."
-sudo apt install ubuntu-restricted-addons
+sudo apt-get update
 
-sudo apt update
-sudo apt upgrade -y
+echo "Fixing Ubuntu 22.04.1 broken installer..."
+sudo ubuntu-drivers autoinstall
+sudo apt-get install ubuntu-restricted-addons
+sudo apt-get upgrade -y gnome-remote-desktop
+
+sudo apt-get upgrade -y
 
 # again not sure
-sudo apt upgrade -y gnome-remote-desktop
-sudo apt dist-upgrade -y
+sudo apt-get dist-upgrade -y
+
+# docker
+# https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo get-docker.sh
+sudo docker run hello-world
