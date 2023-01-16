@@ -1,0 +1,11 @@
+#!/bin/bash
+
+echo "Fixing Ubuntu 22.04.1 broken installer..."
+sudo apt install ubuntu-restricted-addons
+
+sudo apt update
+sudo apt upgrade -y
+
+# again not sure
+sudo apt upgrade -y gnome-remote-desktop
+sudo apt dist-upgrade -y
