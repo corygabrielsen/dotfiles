@@ -10,16 +10,17 @@ sudo apt-get install -y ubuntu-restricted-addons
 sudo apt-get upgrade -y gnome-remote-desktop
 sudo apt-get upgrade -y
 sudo apt-get dist-upgrade -y
+sudo apt-get autoremove
 
 # basic utilities
-sudo apt install -y curl
-sudo apt install -y git
-sudo apt install -y npm
-sudo apt remove -y nodejs
+sudo apt-get install -y curl
+sudo apt-get install -y git
+sudo apt-get install -y npm
+sudo apt-get remove -y nodejs
 curl -s https://deb.nodesource.com/setup_16.x | sudo bash
-sudo apt install -y nodejs
+sudo apt-get install -y nodejs
 sudo npm install -g yarn
-sudo apt install -y zsh
+sudo apt-get install -y zsh
 chsh -s $(which zsh)
 
 # docker
@@ -48,13 +49,13 @@ type -p gh >/dev/null || curl -fsSL https://cli.github.com/packages/githubcli-ar
   && sudo apt install gh -y
   && gh auth login --web --git-protocol ssh
  
- # download dotfiles
- mkdir -p ~/code
- pushd ~/code
- git clone --recursive git@github.com:stoooops/dotfiles.git
- pushd dotfiles
- yarn install
- yarn setup
- popd
- popd
+# download dotfiles
+mkdir -p ~/code
+pushd ~/code
+git clone --recursive git@github.com:stoooops/dotfiles.git
+pushd dotfiles
+yarn install
+yarn setup
+popd
+popd
  
