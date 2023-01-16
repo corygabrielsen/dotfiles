@@ -4,7 +4,7 @@ set -e
 set -x
 
 # install sudo if script ran in docker
-if [ $USER = root ] ; then
+if [ $UID = 0 ] ; then
   apt-get update
   apt-get install sudo
 fi
