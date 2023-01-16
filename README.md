@@ -28,14 +28,29 @@ From a new computer, install git
 ```bash
 sudo apt install -y git
 ```
+
 Install npm
 ```bash
 sudo apt install -y npm
 ```
+
+Remove NodeJS 12
+```bash
+sudo apt remove nodejs
+```
+
+Install NodeJS 16
+```bash
+sudo apt install -y curl
+curl -s https://deb.nodesource.com/setup_16.x | sudo bash
+sudo apt install -y nodejs
+```
+
 Install yarn
 ```bash
 sudo npm install -g yarn
 ```
+
 Install zsh
 ```bash
 sudo apt install -y zsh
