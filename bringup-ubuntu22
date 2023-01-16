@@ -2,10 +2,17 @@
 
 set -e
 set -x
+
+# install sudo if script ran in docker
+if [ $USER = root ] ; then
+  apt-get update
+  apt-get install sudo
+fi
+
 sudo apt-get update
 
 echo "Fixing Ubuntu 22.04.1 broken installer..."
-sudo ubuntu-drivers autoinstall
+type -p ubuntu-drivers >/dev/null && sudo ubuntu-drivers autoinstall
 sudo apt-get install -y ubuntu-restricted-addons
 sudo apt-get upgrade -y gnome-remote-desktop
 sudo apt-get upgrade -y
