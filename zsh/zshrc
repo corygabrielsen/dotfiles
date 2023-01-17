@@ -164,6 +164,8 @@ alias gpl="git pl"
 alias gpu="git pu"
 alias gpuf="git puf"
 alias gpuu="git puu"
+# typo
+alias tgpu="git pu"
 
 # status
 alias gss="git ss"
@@ -182,7 +184,10 @@ gst() {
 alias gstu="git stu"
 alias gsb="git sb"
 # typo
+alias ghst="git st"
+alias gs="git st"
 alias gstg="git st"
+alias gt="git st"
 
 # rebase
 alias grb="git rb"
