@@ -87,9 +87,9 @@ export $(grep -v '^#' $HOME/.api_keys.env | xargs) > /dev/null
 
 # file system
 alias cp="cp -i"
-alias ls="ls -Fh"
-alias ll="ls -Flv"
-alias lla="ls -aFlv"
+alias ls="ls -Fh --color"
+alias ll="ls -Flv --color"
+alias lla="ls -aFlv --color"
 alias mv="mv -i"
 alias rm="rm -i"
 
@@ -187,7 +187,9 @@ alias gsb="git sb"
 alias ghst="git st"
 alias gs="git st"
 alias gstg="git st"
+alias gsts="git st"
 alias gt="git st"
+alias gts="git st"
 
 # rebase
 alias grb="git rb"
@@ -201,6 +203,17 @@ alias grss="git rss"
 alias grss1="git rss1"
 alias grss2="git rss2"
 alias grss3="git rss3"
+
+
+
+###############################################################################
+# Yarn
+###############################################################################
+
+# typos
+alias yar="yarn"
+alias yanr="yarn"
+alias yrn="yarn"
 
 
 
@@ -535,4 +548,5 @@ fi
 #
 if [ -d /usr/local/go ]; then
     export PATH=${PATH}:/usr/local/go/bin
+    export GOPATH=${HOME}/go
 fi
