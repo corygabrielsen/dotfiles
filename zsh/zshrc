@@ -136,6 +136,7 @@ alias gdwnr="git dwnr"
 alias gsdc="git dc"
 alias gdcf="git dc"
 alias gdcv="git dc"
+alias gtdc="git dc"
 
 # fetch
 alias gf="git f"
