@@ -100,9 +100,41 @@ alias cvd=cd
 ###############################################################################
 # Git aliases
 ###############################################################################
+dirdump() {
+    echo "📁 $(pwd)"
+    ls --color=auto -Fh --group-directories-first
+    echo
+}
 
-# add
-alias ga="git a"
+gst() {
+    # check if in a git repo
+    # git rev-parse --git-dir 2>/dev/null ||
+    if [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" ]; then
+        git st
+    else
+        dirdump
+    fi
+}
+
+ga() {
+    if [ $# -eq 0 ]; then
+        # if no args are passed, run `git add .`
+        dirdump
+    elif [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" ]; then
+        # in a git repo so add then run status
+        git add "$@"
+        # log what was added
+        # TODO can enhance when . is passed to print what was added
+        for arg in "$@"; do
+            echo "➕ $arg"
+        done
+        echo
+        git st
+    else
+        # not in a git repo so just run ls
+        dirdump
+    fi
+}
 
 # branch
 alias gb="git b"
@@ -171,17 +203,6 @@ alias tgpu="git pu"
 # status
 alias gss="git ss"
 # check if in repo and run ls if not run `git status`
-gst() {
-    # check if in a git repo
-    # git rev-parse --git-dir 2>/dev/null ||
-    if [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" ]; then
-        git st
-    else
-        echo "📁 $(pwd)"
-        ls --color=auto -Fh --group-directories-first
-        echo
-    fi
-}
 alias gstu="git stu"
 alias gsb="git sb"
 # typo
