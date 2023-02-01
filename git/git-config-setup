@@ -1,0 +1,19 @@
+#!/bin/bash
+
+GITCONFIG_LOCAL=$HOME/.gitconfig.local
+
+# Check if git config user.email is set
+if ! git config user.email >/dev/null 2>&1; then
+    # Prompt for user email
+    read -p "Enter your email for git: " email
+    # Set email in ~/.gitconfig.local
+    git config --file "$GITCONFIG_LOCAL" user.email "$email"
+fi
+
+# Check if git config user.name is set
+if ! git config user.name >/dev/null 2>&1; then
+    # Prompt for user name
+    read -p "Enter your name for git: " name
+    # Set name in ~/.gitconfig.local
+    git config --file "$GITCONFIG_LOCAL" user.name "$name"
+fi

@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "This is a dotfiles repository",
   "scripts": {
-    "setup": "npm run setup-node",
-    "setup-node": "git submodule update --init --recursive && npx ts-node install-node.ts",
-    "setup-python": "git submodule update --init --recursive && python3 -m install"
+    "install:apt": "./bin/install-packages",
+    "setup": "yarn install:apt && yarn setup:node && yarn setup:git",
+    "setup:git": "./git/git-config-setup",
+    "setup:node": "git submodule update --init --recursive && yarn ts-node install-node.ts",
+    "setup:python": "git submodule update --init --recursive && python3 -m install"
   },
   "repository": "git@github.com:stoooops/dotfiles.git",
   "author": "Cory Gabrielsen",
