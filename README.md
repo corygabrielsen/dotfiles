@@ -16,51 +16,122 @@ tools and applications.
 To install these dotfiles, clone the repository and run:
 
 ```bash
-yarn install
+DIR=$HOME/code && \
+mkdir -p $DIR && \
+cd $DIR && \
+git clone --recursive git@github.com:stoooops/dotfiles.git && \
+yarn install && \
 yarn setup
 ```
 
 This will install dependencies and create symlinks for the dotfiles in the repository,
 linking them to the appropriate locations in your home directory.
 
+### One-liner
+
+```bash
+(
+    DIR=$HOME/code && \
+    [ -d "$DIR/dotfiles" ] && echo -e "\x1b[32m$DIR/dotfiles already exists\x1b[0m" && exit 0 || true;
+    prompt() {
+        echo -e "\x1b[32m$1\x1b[0m"
+        sleep 1; echo -n "."; sleep 1; echo -n "."; sleep 1; echo -n "."; sleep 1; echo
+    };
+    sudo apt-get update && \
+    prompt "Installing curl, git, zsh" && \
+    sudo apt-get install -y curl git zsh && \
+    curl --version && \
+    git --version && \
+    zsh --version && \
+    prompt "Installing nodejs v16" && \
+    (test -x "$(command -v npm)" && node -v | grep -q "v16" && exit 0) || \
+    (
+        (
+            (test -x "$(command -v npm)" && sudo apt-get remove nodejs) || true
+        ) && \
+        curl -s https://deb.nodesource.com/setup_16.x | sudo bash && \
+        sudo apt install $Y nodejs
+    ) && \
+    echo "npm  $(npm --version)" && \
+    echo "node $(node --version)" && \
+    prompt "Installing yarn" && \
+    sudo npm install -g yarn && \
+    prompt "Cloning dotfiles" && \
+    mkdir -p $DIR && \
+    cd $DIR && \
+    git clone --recursive git@github.com:stoooops/dotfiles.git && \
+    cd dotfiles && \
+    prompt "Installing dependencies" && \
+    yarn install && \
+    prompt "Running setup" && \
+    yarn setup && \
+    prompt "Setting zsh as default shell" && \
+    sudo chsh -s $(which zsh) && \
+    echo -e "\x1b[32mDone\x1b[0m"
+)
+```
+
 ### Fresh install
-From a new computer, install git
-```bash
-sudo apt install -y git
-```
 
-Install npm
-```bash
-sudo apt install -y npm
-```
+From a new computer:
 
-Remove NodeJS 12
-```bash
-sudo apt remove nodejs
-```
+- install `curl`
 
-Install NodeJS 16
-```bash
-sudo apt install -y curl && \
-curl -s https://deb.nodesource.com/setup_16.x | sudo bash && \
-sudo apt install -y nodejs
-```
+  ```bash
+  sudo apt-get install -y curl
+  ```
 
-Install yarn
-```bash
-sudo npm install -g yarn
-```
+- install `git`
 
-Install zsh
-```bash
-sudo apt install -y zsh
-chsh -s $(which zsh)
-# logout / login
-```
+  ```bash
+  sudo apt-get install -y git
+  ```
 
-Then run the above instructions like normal.
-# Customization
+- install `zsh`
 
-Feel free to use and customize these dotfiles as you see fit. If you make any
-improvements or changes that you think would be useful to others, please
-consider submitting a pull request.
+  ```bash
+  sudo apt-get install -y zsh
+  ```
+
+- install `node` v16
+
+  1. `if` _npm is installed && nodejs == v16_ `then` do nothing
+  2. `else if` _npm is installed && nodejs != v16_ `then` remove it and install nodejs 16
+  3. `else` _npm is not installed_, install nodejs 16
+
+  ```bash
+  (test -x "$(command -v npm)" && node -v | grep -q "v16" && exit 0) || \
+  (
+    (
+        (test -x "$(command -v npm)" && sudo apt-get remove nodejs) || true
+    ) && \
+    curl -s https://deb.nodesource.com/setup_16.x | sudo bash && \
+    sudo apt install $Y nodejs
+  ) && \
+  npm --version && \
+  node --version
+  ```
+
+- install yarn
+
+  ```bash
+  sudo npm install -g yarn
+  ```
+
+- Install dotfiles
+
+  1. clone repo
+  2. install dependencies
+  3. run setup
+  4. set zsh as default shell
+
+  ```bash
+  DIR=$HOME/code &&
+  mkdir -p $DIR && \
+  cd $DIR && \
+  git clone --recursive git@github.com:stoooops/dotfiles.git && \
+  cd dotfiles && \
+  yarn install && \
+  yarn setup && \
+  sudo chsh -s $(which zsh)
+  ```
