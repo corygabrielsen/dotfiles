@@ -41,8 +41,8 @@ sudo apt remove nodejs
 
 Install NodeJS 16
 ```bash
-sudo apt install -y curl
-curl -s https://deb.nodesource.com/setup_16.x | sudo bash
+sudo apt install -y curl && \
+curl -s https://deb.nodesource.com/setup_16.x | sudo bash && \
 sudo apt install -y nodejs
 ```
 
