@@ -34,6 +34,9 @@ export EDITOR=vim
 export PAGER=less
 export LESS=-R
 
+# gpg
+export GPG_TTY=$(tty)
+
 # history
 export HISTFILE=~/.zsh_history
 export HISTSIZE=16000 # spots for duplicates/uniques
@@ -208,6 +211,7 @@ alias gsb="git sb"
 # typo
 alias ghst="git st"
 alias gs="git st"
+alias gsg="git st"
 alias gstg="git st"
 alias gsts="git st"
 alias gt="git st"
@@ -215,7 +219,20 @@ alias gts="git st"
 
 # rebase
 alias grb="git rb"
+alias grba="git rba"
 alias grbc="git rbc"
+alias grbi="git rbi"
+alias grbi1="git rbi1"
+alias grbi2="git rbi2"
+alias grbi3="git rbi3"
+alias grbi4="git rbi4"
+alias grbi5="git rbi5"
+alias grbi6="git rbi6"
+alias grbi7="git rbi7"
+alias grbi8="git rbi8"
+alias grbi9="git rbi9"
+alias grbi10="git rbi10"
+alias grbm="git rbm"
 alias grbs="git rbs"
 
 # reset
@@ -225,6 +242,13 @@ alias grss="git rss"
 alias grss1="git rss1"
 alias grss2="git rss2"
 alias grss3="git rss3"
+alias grss4="git rss4"
+alias grss5="git rss5"
+alias grss6="git rss6"
+alias grss7="git rss7"
+alias grss8="git rss8"
+alias grss9="git rss9"
+alias grss10="git rss10"
 
 
 

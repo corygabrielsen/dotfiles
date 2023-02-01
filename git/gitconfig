@@ -1,109 +1,130 @@
 [advice]
-    statusHints = false
-    detachedHead = false
-    pushNonFastForward = false
-    resolveConflict = false
+	detachedHead = false
+	pushNonFastForward = false
+	resolveConflict = false
+	statusHints = false
 
 [alias]
-    a = add
+	a = add
 
-    b = branch
-    bm = branch --move
+	b = branch
+	bm = branch --move
 
-    c = commit --verbose
-    ca = commit --all
-    cm = commit --message
-    cam = commit --all --message
-    camd = commit --amend
-    caamd = commit --all --amend
-    camamd = commit --all --message --amend
+	c = commit --verbose
+	ca = commit --all
+	cm = commit --message
+	cam = commit --all --message
+	camd = commit --amend
+	caamd = commit --all --amend
+	camamd = commit --all --message --amend
 
-    co = checkout
+	co = checkout
 
-    cp = cherry-pick
+	cp = cherry-pick
 
-    d = diff
-    dc = diff --cached
-    dcc = diff --cached --check
-    dh = diff HEAD^ HEAD
-    dnr = diff --no-renames
-    dw = diff --ignore-all-space
-    dwnr = diff --ignore-all-space --no-renames
+	d = diff
+	dc = diff --cached
+	dcc = diff --cached --check
+	dh = diff HEAD^ HEAD
+	dnr = diff --no-renames
+	dw = diff --ignore-all-space
+	dwnr = diff --ignore-all-space --no-renames
 
-    f = fetch
+	f = fetch
 
-    i = init
+	i = init
 
-    l    = log
-    ld   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(magenta)%ad%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --date=short
-    ldag = log --decorate --all --graph
-    lg   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --graph
-    lga  = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --graph --all
-    lgd  = log --pretty=format:\"%C(yellow)%h%C(reset) %C(magenta)%ad%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --graph --date=short
-    ll   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --numstat
-    lld  = log --pretty=format:\"%C(yellow)%h%C(reset) %C(magenta)%ad%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --numstat --date=short
-    ls   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate
+	l	= log
+	ld   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(magenta)%ad%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --date=short
+	ldag = log --decorate --all --graph
+	lg   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --graph
+	lga  = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --graph --all
+	lgd  = log --pretty=format:\"%C(yellow)%h%C(reset) %C(magenta)%ad%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --graph --date=short
+	ll   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --numstat
+	lld  = log --pretty=format:\"%C(yellow)%h%C(reset) %C(magenta)%ad%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --numstat --date=short
+	ls   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate
 
-    m = merge
+	m = merge
 
-    pl = pull
+	pl = pull
 
-    pu = push
-    puf = push -f
-    puu = push -u origin HEAD
+	pu = push
+	puf = push -f
+	puu = push -u origin HEAD
 
-    ss = show --summary
+	ss = show --summary
 
-    st = status
-    stu = status -u
-    sb = status -sb
+	st = status
+	stu = status -u
+	sb = status -sb
 
-    rb = rebase
-    rbc = rebase --continue
-    rbs = rebase --skip
+	rb = rebase
+	rba = rebase --abort
+	rbc = rebase --continue
+	rbi = rebase -i
+	rbi1 = rebase -i HEAD~1
+	rbi2 = rebase -i HEAD~2
+	rbi3 = rebase -i HEAD~3
+	rbi4 = rebase -i HEAD~4
+	rbi5 = rebase -i HEAD~5
+	rbi6 = rebase -i HEAD~6
+	rbi7 = rebase -i HEAD~7
+	rbi8 = rebase -i HEAD~8
+	rbi9 = rebase -i HEAD~9
+	rbi10 = rebase -i HEAD~10
+	rbs = rebase --skip
 
-    reste = reset
-    rest = reset
-    rs = reset
-    rh = reset HEAD
-    rss = reset --soft
-    rss1 = reset --soft \"HEAD^\"
-    rss2 = reset --soft \"HEAD^^\"
-    rss3 = reset --soft \"HEAD^^^\"
-    dag = log --graph --format='format:%C(yellow)%h%C(reset) %C(blue)\"%an\" <%ae>%C(reset) %C(magenta)%cr%C(reset)%C(auto)%d%C(reset)%n%s' --date-order
+	reste = reset
+	rest = reset
+	rs = reset
+	rh = reset HEAD
+	rss = reset --soft
+	rss1 = reset --soft \"HEAD^\"
+	rss2 = reset --soft \"HEAD^^\"
+	rss3 = reset --soft \"HEAD^^^\"
+	rss4 = reset --soft \"HEAD^^^^\"
+	rss5 = reset --soft \"HEAD^^^^^\"
+	rss6 = reset --soft \"HEAD^^^^^^\"
+	rss7 = reset --soft \"HEAD^^^^^^^\"
+	rss8 = reset --soft \"HEAD^^^^^^^^\"
+	rss9 = reset --soft \"HEAD^^^^^^^^^\"
+	rss10 = reset --soft \"HEAD^^^^^^^^^^\"
+	dag = log --graph --format='format:%C(yellow)%h%C(reset) %C(blue)\"%an\" <%ae>%C(reset) %C(magenta)%cr%C(reset)%C(auto)%d%C(reset)%n%s' --date-order
 
 [color]
-    ui = auto
+	ui = auto
 
 [color "status"]
-    added = green
-    changed = yellow
-    untracked = cyan
+	added = green
+	changed = yellow
+	untracked = cyan
+
+[commit]
+	gpgsign = true
 
 [core]
-    pager = less -r
+	pager = less -r
 
 [credential]
-    helper = cache --timeout 3600
+	helper = cache --timeout 3600
 
 [diff]
-    tool = vimdiff
-
-[hooks]
-    showwhitespaceerrors = false
-    removetrailingwhitespace = false
-    removetrailingnewlines = false
+	tool = vimdiff
 
 [include]
-    # For username / creds / backwards-compatability / etc.
-    path = ~/.gitconfig.local
+	# For username / creds / backwards-compatability / etc.
+	path = ~/.gitconfig.local
 
 [init]
-    templatedir = ~/.git-template
+	templatedir = ~/.git-template
 
 [merge]
-    tool = vimdiff
-[user]
-    name = Cory Gabrielsen
+	tool = vimdiff
+
 [push]
-    default = simple
+	default = simple
+
+[user]
+	name = Cory Gabrielsen
+	# email excluded to prevent spam as this file is public
+	signingkey = 9B67A54E2CF4959E1863079D7122A3A76B01C274
