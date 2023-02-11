@@ -66,7 +66,7 @@ linking them to the appropriate locations in your home directory.
     prompt "Running setup" && \
     yarn setup && \
     prompt "Setting zsh as default shell" && \
-    sudo chsh -s $(which zsh) && \
+    chsh -s $(which zsh) && \
     echo -e "\x1b[32mDone\x1b[0m"
 )
 ```
@@ -133,5 +133,5 @@ From a new computer:
   cd dotfiles && \
   yarn install && \
   yarn setup && \
-  sudo chsh -s $(which zsh)
+  chsh -s $(which zsh)
   ```
