@@ -29,6 +29,9 @@
 
 export LANG=en_US.UTF-8
 
+export UID=$(id -u)
+export GID=$(id -g)
+
 # editor
 export EDITOR=vim
 export PAGER=less
