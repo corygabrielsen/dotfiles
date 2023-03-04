@@ -55,6 +55,7 @@
 	pu = push
 	puf = push -f
 	puu = push -u origin HEAD
+	puuf = push -f -u origin HEAD
 
 	ss = show --summary
 

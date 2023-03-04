@@ -207,6 +207,7 @@ alias gpl="git pl"
 alias gpu="git pu"
 alias gpuf="git puf"
 alias gpuu="git puu"
+alias gpuuf="git puuf"
 # typo
 alias tgpu="git pu"
 
