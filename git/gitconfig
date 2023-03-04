@@ -21,6 +21,10 @@
 	co = checkout
 
 	cp = cherry-pick
+	cpa = cherry-pick --abort
+	cpc = cherry-pick --continue
+	cps = cherry-pick --skip
+	cpq = cherry-pick --quit
 
 	d = diff
 	dc = diff --cached
@@ -34,7 +38,7 @@
 
 	i = init
 
-	l	= log
+	l    = log
 	ld   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(magenta)%ad%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --date=short
 	ldag = log --decorate --all --graph
 	lg   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --graph

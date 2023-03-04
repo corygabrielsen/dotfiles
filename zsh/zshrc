@@ -160,6 +160,10 @@ alias gco="git co"
 
 # cherry-pick
 alias gcp="git cp"
+alias gcpa="git cpa"
+alias gcpc="git cpc"
+alias gcps="git cps"
+alias gcpq="git cpq"
 
 # diff
 alias gd="git d"
