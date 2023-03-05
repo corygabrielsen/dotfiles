@@ -121,6 +121,7 @@
 	path = ~/.gitconfig.local
 
 [init]
+	defaultBranch = master
 	templatedir = ~/.git-template
 
 [merge]
