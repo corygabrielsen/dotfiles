@@ -43,13 +43,14 @@ linking them to the appropriate locations in your home directory.
     curl --version && \
     git --version && \
     zsh --version && \
-    prompt "Installing nodejs v16" && \
-    (test -x "$(command -v npm)" && node -v | grep -q "v16" && exit 0) || \
+    NODE_VERSION=18 && \
+    prompt "Installing nodejs v${NODE_VERSION}" && \
+    (test -x "$(command -v npm)" && node -v | grep -q "v${NODE_VERSION}" && exit 0) || \
     (
         (
             (test -x "$(command -v npm)" && sudo apt-get remove nodejs) || true
         ) && \
-        curl -s https://deb.nodesource.com/setup_16.x | sudo bash && \
+        curl -s "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | sudo bash && \
         sudo apt install $Y nodejs
     ) && \
     echo "npm  $(npm --version)" && \
@@ -93,20 +94,22 @@ From a new computer:
   sudo apt-get install -y zsh
   ```
 
-- install `node` v16
+- install `node` v18
 
-  1. `if` _npm is installed && nodejs == v16_ `then` do nothing
-  2. `else if` _npm is installed && nodejs != v16_ `then` remove it and install nodejs 16
-  3. `else` _npm is not installed_, install nodejs 16
+  1. `if` _npm is installed && nodejs == v18_ `then` do nothing
+  2. `else if` _npm is installed && nodejs != v18_ `then` remove it and install nodejs 16
+  3. `else` _npm is not installed_, install nodejs 18
 
   ```bash
-  (test -x "$(command -v npm)" && node -v | grep -q "v16" && exit 0) || \
+  NODE_VERSION=18 && \
+  prompt "Installing nodejs v${NODE_VERSION}" && \
+  (test -x "$(command -v npm)" && node -v | grep -q "v${NODE_VERSION}" && exit 0) || \
   (
-    (
-        (test -x "$(command -v npm)" && sudo apt-get remove nodejs) || true
-    ) && \
-    curl -s https://deb.nodesource.com/setup_16.x | sudo bash && \
-    sudo apt install $Y nodejs
+      (
+          (test -x "$(command -v npm)" && sudo apt-get remove nodejs) || true
+      ) && \
+      curl -s "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | sudo bash && \
+      sudo apt install $Y nodejs
   ) && \
   npm --version && \
   node --version
