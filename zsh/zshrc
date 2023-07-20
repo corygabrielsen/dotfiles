@@ -69,7 +69,14 @@ function set_background_color() {
     echo -e "\033]11;$color\007"
 }
 # Call the function at the end of .zshrc to set the background color whenever a terminal is opened.
-set_background_color
+export TERMINAL_COLOR=$(set_background_color)
+echo -e "\033]11;$TERMINAL_COLOR\007"
+# A wrapper for ssh
+function ssh() {
+    local color_before_ssh=$TERMINAL_COLOR
+    /usr/bin/ssh "$@"
+    echo -e "\033]11;$color_before_ssh\007"
+}
 
 
 
