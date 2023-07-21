@@ -9,6 +9,7 @@ net-tools
 nmap
 openssh-server
 tmux
+tree
 vim
 wget
 zsh
