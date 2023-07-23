@@ -53,15 +53,15 @@
 	pl = pull
 
 	pu = push
-	puf = push -f
-	puu = push -u origin HEAD
-	puuf = push -f -u origin HEAD
+	puf = push --force-with-lease
+	puu = push --set-upstream origin HEAD
+	puuf = push --force-with-lease --set-upstream origin HEAD
 
 	ss = show --summary
 
 	st = status
-	stu = status -u
-	sb = status -sb
+	stb = status --short --branch
+	stu = status --untracked-files=all
 
 	rb = rebase
 	rba = rebase --abort

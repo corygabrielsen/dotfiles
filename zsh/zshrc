@@ -248,7 +248,7 @@ alias tgpu="git pu"
 alias gss="git ss"
 # check if in repo and run ls if not run `git status`
 alias gstu="git stu"
-alias gsb="git sb"
+alias gstb="git stb"
 # typo
 alias ghst="git st"
 alias gs="git st"
@@ -301,6 +301,14 @@ alias grss10="git rss10"
 alias yar="yarn"
 alias yanr="yarn"
 alias yrn="yarn"
+
+# aliases
+alias yb="yarn build"
+alias ybt="yarn build && yarn test"
+alias yc="yarn clean"
+alias ycb="yarn clean && yarn build"
+alias ycbt="yarn clean && yarn build && yarn test"
+alias yt="yarn test"
 
 
 
