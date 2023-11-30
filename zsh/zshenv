@@ -24,3 +24,6 @@
 #
 # Hours wasted: 2
 #
+. "$HOME/.cargo/env"
+
+export PATH="$PATH:/home/dev/.foundry/bin"
