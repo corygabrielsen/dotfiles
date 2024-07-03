@@ -20,6 +20,7 @@ DIR=$HOME/code && \
 mkdir -p $DIR && \
 cd $DIR && \
 git clone --recursive git@github.com:stoooops/dotfiles.git && \
+cd $DIR/dotfiles && \
 yarn install && \
 yarn setup
 ```
