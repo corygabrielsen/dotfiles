@@ -32,44 +32,48 @@ linking them to the appropriate locations in your home directory.
 
 ```bash
 (
-    DIR=$HOME/code && \
-    [ -d "$DIR/dotfiles" ] && echo -e "\x1b[32m$DIR/dotfiles already exists\x1b[0m" && exit 0 || true;
-    prompt() {
-        echo -e "\x1b[32m$1\x1b[0m"
-        sleep 1; echo -n "."; sleep 1; echo -n "."; sleep 1; echo -n "."; sleep 1; echo
-    };
-    sudo apt-get update && \
-    prompt "Installing curl, git, zsh" && \
-    sudo apt-get install -y curl git zsh && \
-    curl --version && \
-    git --version && \
-    zsh --version && \
-    NODE_VERSION=18 && \
-    prompt "Installing nodejs v${NODE_VERSION}" && \
-    (test -x "$(command -v npm)" && node -v | grep -q "v${NODE_VERSION}" && exit 0) || \
-    (
-        (
-            (test -x "$(command -v npm)" && sudo apt-get remove nodejs) || true
-        ) && \
-        curl -s "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | sudo bash && \
-        sudo apt install $Y nodejs
-    ) && \
-    echo "npm  $(npm --version)" && \
-    echo "node $(node --version)" && \
-    prompt "Installing yarn" && \
-    sudo npm install -g yarn && \
-    prompt "Cloning dotfiles" && \
-    mkdir -p $DIR && \
-    cd $DIR && \
-    git clone --recursive git@github.com:stoooops/dotfiles.git && \
-    cd dotfiles && \
-    prompt "Installing dependencies" && \
-    yarn install && \
-    prompt "Running setup" && \
-    yarn setup && \
-    prompt "Setting zsh as default shell" && \
-    chsh -s $(which zsh) && \
-    echo -e "\x1b[32mDone\x1b[0m"
+    DIR=$HOME/code;
+
+    prompt() { echo -e "\x1b[32m$1\x1b[0m"; sleep 1; echo -n "."; sleep 1; echo -n "."; sleep 1; echo -n "."; sleep 1; echo; }
+
+    install_base() {
+        sudo apt-get update && sudo apt-get install -y curl git zsh;
+        curl --version && git --version && zsh --version;
+    }
+
+    install_nvm() {
+        curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash;
+        export NVM_DIR="$HOME/.nvm";
+        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh";
+    }
+
+    install_node() {
+        nvm install 20 && nvm use 20;
+        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh";
+        echo "npm $(npm --version)"; echo "node $(node --version)";
+    }
+
+    install_yarn() { npm install -g yarn; }
+
+    clone_dotfiles() {
+        mkdir -p $DIR && cd $DIR;
+        git clone --recursive git@github.com:stoooops/dotfiles.git && cd dotfiles;
+    }
+
+    run_setup() {
+        yarn install && yarn setup;
+        chsh -s $(which zsh);
+        echo -e "\x1b[32mDone\x1b[0m";
+    }
+
+    [ -d "$DIR/dotfiles" ] && prompt "$DIR/dotfiles already exists" && exit 0 || true;
+
+    prompt "Installing curl, git, zsh" && install_base && \
+    prompt "Installing NVM" && install_nvm && \
+    prompt "Installing Node.js v20" && install_node && \
+    prompt "Installing yarn" && install_yarn && \
+    prompt "Cloning dotfiles" && clone_dotfiles && \
+    prompt "Installing dependencies and running setup" && run_setup
 )
 ```
 
@@ -95,25 +99,20 @@ From a new computer:
   sudo apt-get install -y zsh
   ```
 
-- install `node` v18
-
-  1. `if` _npm is installed && nodejs == v18_ `then` do nothing
-  2. `else if` _npm is installed && nodejs != v18_ `then` remove it and install nodejs 16
-  3. `else` _npm is not installed_, install nodejs 18
+- install `nvm`
 
   ```bash
-  NODE_VERSION=18 && \
-  prompt "Installing nodejs v${NODE_VERSION}" && \
-  (test -x "$(command -v npm)" && node -v | grep -q "v${NODE_VERSION}" && exit 0) || \
-  (
-      (
-          (test -x "$(command -v npm)" && sudo apt-get remove nodejs) || true
-      ) && \
-      curl -s "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | sudo bash && \
-      sudo apt install $Y nodejs
-  ) && \
-  npm --version && \
-  node --version
+  curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash;
+  export NVM_DIR="$HOME/.nvm";
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh";
+  ```
+
+- install `node`
+
+  ```bash
+  nvm install 20 && nvm use 20;
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh";
+  echo "npm $(npm --version)"; echo "node $(node --version)";
   ```
 
 - install yarn
