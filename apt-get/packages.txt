@@ -10,6 +10,7 @@ nmap
 openssh-server
 tmux
 tree
+unzip
 vim
 wget
 zsh
