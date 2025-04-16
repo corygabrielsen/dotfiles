@@ -18,12 +18,3 @@
 #
 #   ln -s path/to/dotfiles/zsh/zshenv ~/.zshenv
 #
-
-#
-# After much debugging, I haven't found a need for this. I'm leaving it here.
-#
-# Hours wasted: 2
-#
-. "$HOME/.cargo/env"
-
-export PATH="$PATH:/home/dev/.foundry/bin"

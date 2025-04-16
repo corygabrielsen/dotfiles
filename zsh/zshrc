@@ -51,8 +51,22 @@ export SAVEHIST=15000 # unique events guaranteed
 # Terminal background color
 ################################################################################
 function set_background_color() {
-    machine_id=$(cat /etc/machine-id)
-    digit=$(echo -n "$machine_id" | md5sum | tr -d -c 0-9 | cut -c1)
+    # Try different methods to get a unique machine identifier
+    if [[ -f "/etc/machine-id" ]]; then
+        machine_id=$(cat /etc/machine-id)
+    elif [[ -f "/var/lib/dbus/machine-id" ]]; then
+        machine_id=$(cat /var/lib/dbus/machine-id)
+    elif [[ "${OSTYPE}" == "darwin"* ]]; then
+        # Use hardware UUID on macOS
+        machine_id=$(ioreg -d2 -c IOPlatformExpertDevice | awk -F\" '/IOPlatformUUID/{print $(NF-1)}')
+    else
+        # Fallback to hostname if no other identifier is available
+        machine_id=$(hostname)
+    fi
+
+    # Get first digit of md5 hash
+    digit=$(echo -n "$machine_id" | md5sum 2>/dev/null || echo -n "$machine_id" | md5 2>/dev/null | tr -d -c 0-9 | cut -c1)
+
     case "$digit" in
         0) color="#282a36" ;; # Dracula background
         1) color="#2E3440" ;; # Nord Polar Night
@@ -646,7 +660,26 @@ if [ -d /usr/local/go ]; then
     export GOPATH=${HOME}/go
 fi
 
+################################################################################
+# rust
+################################################################################
+#
+# Rust toolchain and related tools
+#
 
+# Source cargo environment if it exists
+if [[ -f "$HOME/.cargo/env" ]]; then
+    . "$HOME/.cargo/env"
+fi
+
+# Add foundry to PATH if it exists
+# Check common installation paths across different systems
+for foundry_path in "$HOME/.foundry/bin" "/usr/local/foundry/bin"; do
+    if [[ -d "$foundry_path" ]]; then
+        export PATH="$PATH:$foundry_path"
+        break
+    fi
+done
 
 ################################################################################
 # nvm
