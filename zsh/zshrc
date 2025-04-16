@@ -690,4 +690,14 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 
-. "$HOME/.local/bin/env"
+################################################################################
+# User-specific binaries and scripts
+################################################################################
+#
+# ~/.local/bin is the standard location for user-specific executables and scripts
+# following the XDG Base Directory Specification. This directory is meant for
+# binaries and scripts that should only be available to the current user.
+#
+if [[ -f "$HOME/.local/bin/env" ]]; then
+    . "$HOME/.local/bin/env"
+fi
