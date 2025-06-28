@@ -476,7 +476,7 @@ bindkey '^R' history-incremental-search-backward
 
 # Display the current git branch
 parse_git_branch() {
-    local branch_name="$(git symbolic-ref HEAD 2>/dev/null | cut -d"/" -f 3)"
+    local branch_name="$(git symbolic-ref HEAD 2>/dev/null | sed 's|refs/heads/||')"
     if [ ! "${branch_name}" ]; then
         local git_sha="$(git rev-parse --short HEAD)"
         echo "%{$BRIGHT_RED%}(${git_sha})%{$ENDC%}"
