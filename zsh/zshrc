@@ -204,6 +204,7 @@ alias gamcamd="git camamd"
 
 # checkout
 alias gco="git co"
+alias gcob="git cob"
 
 # cherry-pick
 alias gcp="git cp"

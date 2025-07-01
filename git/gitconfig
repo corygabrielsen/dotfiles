@@ -19,6 +19,7 @@
 	camamd = commit --all --message --amend
 
 	co = checkout
+	cob = checkout -b
 
 	cp = cherry-pick
 	cpa = cherry-pick --abort
