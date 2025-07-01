@@ -50,6 +50,8 @@
 	ls   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate
 
 	m = merge
+	ma = merge --abort
+	mc = merge --continue
 
 	pl = pull
 

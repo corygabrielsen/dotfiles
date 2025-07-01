@@ -247,6 +247,7 @@ alias gls="git ls"
 
 # merge
 alias gm="git m"
+alias gma="git ma"
 alias gmc="git mc"
 
 # pull
