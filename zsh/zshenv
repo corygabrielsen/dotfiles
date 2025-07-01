@@ -18,3 +18,7 @@
 #
 #   ln -s path/to/dotfiles/zsh/zshenv ~/.zshenv
 #
+
+# Source local environment variables if the file exists
+[[ -f ~/.zshenv.local ]] && source ~/.zshenv.local
+
