@@ -119,10 +119,6 @@
 [diff]
 	tool = vimdiff
 
-[include]
-	# For username / creds / backwards-compatability / etc.
-	path = ~/.gitconfig.local
-
 [init]
 	defaultBranch = master
 	templatedir = ~/.git-template
@@ -137,3 +133,8 @@
 	name = Cory Gabrielsen
 	# email excluded to prevent spam as this file is public
 	signingkey = 9B67A54E2CF4959E1863079D7122A3A76B01C274
+
+# Must be last in the file to prevent overrides
+[include]
+	# For username / creds / backwards-compatability / etc.
+	path = ~/.gitconfig.local
