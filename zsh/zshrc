@@ -266,7 +266,7 @@ alias gss="git ss"
 # check if in repo and run ls if not run `git status`
 alias gstu="git stu"
 alias gstb="git stb"
-# typo
+# typos
 alias ghst="git st"
 alias gs="git st"
 alias gsg="git st"
@@ -274,6 +274,11 @@ alias gstg="git st"
 alias gsts="git st"
 alias gt="git st"
 alias gts="git st"
+
+# switch
+alias gsw="git sw"
+alias gswc="git swc"
+alias gswd="git swd"
 
 # rebase
 alias grb="git rb"

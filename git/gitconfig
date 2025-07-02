@@ -66,6 +66,10 @@
 	stb = status --short --branch
 	stu = status --untracked-files=all
 
+	sw = switch
+	swc = switch --create
+	swd = switch --detach
+
 	rb = rebase
 	rba = rebase --abort
 	rbc = rebase --continue
