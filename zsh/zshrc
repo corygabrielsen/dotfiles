@@ -33,9 +33,11 @@ export UID=$(id -u)
 export GID=$(id -g)
 
 # editor
-export EDITOR=vim
-export PAGER=less
-export LESS=-R
+if ! is_ai_agent 2>/dev/null; then
+    export EDITOR=vim
+    export PAGER=less
+    export LESS=-R
+fi
 
 # gpg
 export GPG_TTY=$(tty)
@@ -44,6 +46,14 @@ export GPG_TTY=$(tty)
 export HISTFILE=~/.zsh_history
 export HISTSIZE=16000 # spots for duplicates/uniques
 export SAVEHIST=15000 # unique events guaranteed
+
+# build tools - use all available cores for parallel compilation
+export MAKEFLAGS="-j$(nproc)"
+
+# Check if running under an AI agent
+is_ai_agent() {
+    [[ "$CURSOR_AGENT" == "1" ]] || [[ "$CLAUDE_AGENT" == "1" ]]
+}
 
 
 
@@ -139,12 +149,14 @@ export $(grep -v '^#' $HOME/.api_keys.env | xargs) > /dev/null
 ###############################################################################
 
 # file system
-alias cp="cp -i"
 alias ls="ls -Fh --color"
 alias ll="ls -Flv --color"
 alias lla="ls -aFlv --color"
-alias mv="mv -i"
-alias rm="rm -i"
+if ! is_ai_agent 2>/dev/null; then
+    alias cp="cp -i"
+    alias mv="mv -i"
+    alias rm="rm -i"
+fi
 
 # typo
 alias cvd=cd
@@ -639,6 +651,68 @@ srcdump() {
   dump |
   grep -vE "(.git|.next|build|cache|coverage|dist|log|logs|node_modules|out|site|tmp|venv)"
 }
+
+
+###############################################################################
+# AI Agent Settings
+###############################################################################
+#
+# Special settings for AI agents (Cursor, Claude, etc.)
+# These settings optimize the shell for non-interactive automation
+#
+# Set one of these in your environment to enable AI agent mode:
+#   export CURSOR_AGENT=1  # For Cursor
+#   export CLAUDE_AGENT=1  # For Claude Desktop
+#
+
+if is_ai_agent; then
+
+    # Disable history expansion (!) to avoid issues with special characters
+    setopt NO_BANG_HIST
+
+    # Use non-interactive editors and pagers
+    export EDITOR=nano
+    export VISUAL=nano
+    export PAGER=cat
+    export LESS="-R --quit-if-one-screen --no-init"
+
+    # Override file operation aliases to be non-interactive
+    alias cp="cp -f"
+    alias mv="mv -f"
+    alias rm="rm -f"
+
+    # Package managers - non-interactive mode
+    alias apt="apt -y"
+    alias apt-get="apt-get -y"
+    alias npm="npm --yes"
+    alias yarn="yarn --non-interactive"
+    alias pip="pip --quiet"
+    alias pip3="pip3 --quiet"
+
+    # Git - prevent interactive prompts
+    alias git="git -c core.editor=true -c merge.tool=false"
+
+    # Make/build tools - non-interactive
+    alias make="make --no-print-directory"
+
+    # File operations with progress
+    alias rsync="rsync --progress"
+
+    # Separate history file for each agent
+    if [[ "$CURSOR_AGENT" == "1" ]]; then
+        export HISTFILE=~/.zsh_history_cursor
+    elif [[ "$CLAUDE_AGENT" == "1" ]]; then
+        export HISTFILE=~/.zsh_history_claude
+    else
+        # Fallback for any future agents
+        export HISTFILE=~/.zsh_history_agent
+    fi
+
+        # Environment variables for non-interactive operation
+    export DEBIAN_FRONTEND=noninteractive
+    export PYTHONUNBUFFERED=1
+
+fi
 
 
 ################################################################################
