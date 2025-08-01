@@ -698,6 +698,19 @@ export NVM_DIR="$HOME/.nvm"
 
 
 ################################################################################
+# direnv
+################################################################################
+#
+# direnv is an environment switcher for the shell. It knows how to hook into
+# bash, zsh, tcsh, fish shell and elvish to load or unload environment variables
+# depending on the current directory.
+#
+if command -v direnv >/dev/null 2>&1; then
+    eval "$(direnv hook zsh)"
+fi
+
+
+################################################################################
 # User-specific binaries and scripts
 ################################################################################
 #
