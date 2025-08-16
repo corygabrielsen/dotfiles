@@ -674,6 +674,7 @@ if is_ai_agent; then
     export EDITOR=nano
     export VISUAL=nano
     export PAGER=cat
+    export GIT_PAGER=cat
     export LESS="-R --quit-if-one-screen --no-init"
 
     # Override file operation aliases to be non-interactive
