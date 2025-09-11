@@ -47,8 +47,17 @@ export HISTFILE=~/.zsh_history
 export HISTSIZE=16000 # spots for duplicates/uniques
 export SAVEHIST=15000 # unique events guaranteed
 
-# build tools - use all available cores for parallel compilation
-export MAKEFLAGS="-j$(nproc)"
+# build tools - use all available cores for parallel compilation (cross-platform)
+get_num_cores() {
+    if command -v nproc >/dev/null 2>&1; then
+        nproc
+    elif [[ "${OSTYPE}" == "darwin"* ]]; then
+        sysctl -n hw.ncpu
+    else
+        getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1
+    fi
+}
+export MAKEFLAGS="-j$(get_num_cores)"
 
 # Check if running under an AI agent
 is_ai_agent() {
@@ -796,3 +805,4 @@ fi
 if [[ -f "$HOME/.local/bin/env" ]]; then
     . "$HOME/.local/bin/env"
 fi
+
