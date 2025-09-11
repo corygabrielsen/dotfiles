@@ -116,6 +116,7 @@
 
 [core]
 	pager = less -r
+	commentChar = ";"
 
 [credential]
 	helper = cache --timeout 3600
