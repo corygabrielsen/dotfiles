@@ -40,6 +40,7 @@
 	i = init
 
 	l    = log
+    lb1  = log -1 --pretty=format:%B
 	ld   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(magenta)%ad%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --date=short
 	ldag = log --decorate --all --graph
 	lg   = log --pretty=format:\"%C(yellow)%h%C(reset) %C(blue)[%cn]%C(reset)%C(auto)%d%C(reset) %s\" --decorate --graph

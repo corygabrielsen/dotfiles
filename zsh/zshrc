@@ -257,6 +257,7 @@ alias gi="git i"
 
 # log
 alias gl="git l"
+alias glb1="git lb1 | cat"
 alias gld="git ld"
 alias gldag="git ldag"
 alias glg="git lg"
