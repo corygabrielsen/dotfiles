@@ -85,6 +85,26 @@
 	rbi8 = rebase -i HEAD~8
 	rbi9 = rebase -i HEAD~9
 	rbi10 = rebase -i HEAD~10
+    rbi11 = rebase -i HEAD~11
+    rbi12 = rebase -i HEAD~12
+    rbi13 = rebase -i HEAD~13
+    rbi14 = rebase -i HEAD~14
+    rbi15 = rebase -i HEAD~15
+    rbi16 = rebase -i HEAD~16
+    rbi17 = rebase -i HEAD~17
+    rbi18 = rebase -i HEAD~18
+    rbi19 = rebase -i HEAD~19
+    rbi20 = rebase -i HEAD~20
+    rbi21 = rebase -i HEAD~21
+    rbi22 = rebase -i HEAD~22
+    rbi23 = rebase -i HEAD~23
+    rbi24 = rebase -i HEAD~24
+    rbi25 = rebase -i HEAD~25
+    rbi26 = rebase -i HEAD~26
+    rbi27 = rebase -i HEAD~27
+    rbi28 = rebase -i HEAD~28
+    rbi29 = rebase -i HEAD~29
+    rbi30 = rebase -i HEAD~30
 	rbs = rebase --skip
 
 	reste = reset
