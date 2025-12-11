@@ -5,8 +5,8 @@ Personal dotfiles managed via symlinks. Zero dependencies beyond `make` and `git
 ## Quick Start
 
 ```bash
-git clone git@github.com:corygabrielsen/dotfiles.git ~/code/dotfiles
-cd ~/code/dotfiles
+git clone git@github.com:corygabrielsen/dotfiles.git
+cd dotfiles
 make
 ```
 
