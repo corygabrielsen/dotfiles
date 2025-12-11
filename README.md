@@ -10,7 +10,7 @@ cd ~/code/dotfiles
 make
 ```
 
-Fresh machine? First: `sudo apt-get update && sudo apt-get install -y make git`
+One-liner: `sudo apt-get update && sudo apt-get install -y make git && git clone git@github.com:corygabrielsen/dotfiles.git ~/code/dotfiles && cd ~/code/dotfiles && make`
 
 ## Commands
 
