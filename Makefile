@@ -46,7 +46,8 @@ SYMLINKS := \
 	vimrc:vim/vimrc \
 	zshenv:zsh/zshenv \
 	zprofile:zsh/zprofile \
-	zshrc:zsh/zshrc
+	zshrc:zsh/zshrc \
+	claude-env.sh:claude/claude-env.sh
 
 ###############################################################################
 # TIER 1: ORCHESTRATORS
@@ -57,7 +58,7 @@ setup: install-symlinks install-git-config
 	@printf '%b%s%b %s\n' '$(_COLOR_SUCCESS)' '✓' '$(_COLOR_RESET)' 'Setup complete'
 
 .PHONY: require
-require: require-symlinks
+require: require-symlinks require-git-config
 	@printf '%b%s%b %s\n' '$(_COLOR_SUCCESS)' '✓' '$(_COLOR_RESET)' 'Environment OK'
 
 .PHONY: doctor
@@ -92,6 +93,7 @@ require-symlinks:
 			printf '%b%s%b %s\n' '$(_COLOR_ERROR)' 'Error:' '$(_COLOR_RESET)' '$(target) not linked correctly'; \
 			exit 1; \
 		fi;)
+	@printf '%b%s%b %s\n' '$(_COLOR_SUCCESS)' '✓' '$(_COLOR_RESET)' 'All symlinks OK'
 
 .PHONY: doctor-symlinks
 doctor-symlinks:
@@ -123,13 +125,28 @@ install-git-config:
 		printf '  %b%s%b %s\n' '$(_COLOR_SUCCESS)' '✓' '$(_COLOR_RESET)' "user.email = $$(git config user.email)"; \
 	else \
 		printf '  %b%s%b\n' '$(_COLOR_WARN)' '!' '$(_COLOR_RESET)' 'user.email not set'; \
-		printf '  %b%s%b\n' '$(_COLOR_DIM)' '  Run: git config --global user.email "you@example.com"' '$(_COLOR_RESET)'; \
+		read -p "    Enter your email for git: " email; \
+		git config --file $(HOME)/.gitconfig.local user.email "$$email"; \
+		printf '  %b%s%b %s\n' '$(_COLOR_SUCCESS)' '✓' '$(_COLOR_RESET)' "user.email = $$email"; \
 	fi
 	@if git config user.name >/dev/null 2>&1; then \
 		printf '  %b%s%b %s\n' '$(_COLOR_SUCCESS)' '✓' '$(_COLOR_RESET)' "user.name = $$(git config user.name)"; \
 	else \
 		printf '  %b%s%b\n' '$(_COLOR_WARN)' '!' '$(_COLOR_RESET)' 'user.name not set'; \
-		printf '  %b%s%b\n' '$(_COLOR_DIM)' '  Run: git config --global user.name "Your Name"' '$(_COLOR_RESET)'; \
+		read -p "    Enter your name for git: " name; \
+		git config --file $(HOME)/.gitconfig.local user.name "$$name"; \
+		printf '  %b%s%b %s\n' '$(_COLOR_SUCCESS)' '✓' '$(_COLOR_RESET)' "user.name = $$name"; \
+	fi
+
+.PHONY: require-git-config
+require-git-config:
+	@if ! git config user.email >/dev/null 2>&1; then \
+		printf '%b%s%b %s\n' '$(_COLOR_ERROR)' 'Error:' '$(_COLOR_RESET)' 'git user.email not configured'; \
+		exit 1; \
+	fi
+	@if ! git config user.name >/dev/null 2>&1; then \
+		printf '%b%s%b %s\n' '$(_COLOR_ERROR)' 'Error:' '$(_COLOR_RESET)' 'git user.name not configured'; \
+		exit 1; \
 	fi
 
 .PHONY: doctor-git-config
