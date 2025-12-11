@@ -5,33 +5,34 @@ Personal dotfiles managed via symlinks. Zero dependencies beyond `make` and `git
 ## Quick Start
 
 ```bash
-# Fresh machine
-sudo apt-get update && sudo apt-get install -y make git
 git clone git@github.com:corygabrielsen/dotfiles.git ~/code/dotfiles
-cd ~/code/dotfiles && make
+cd ~/code/dotfiles
+make
 ```
+
+Fresh machine? First: `sudo apt-get update && sudo apt-get install -y make git`
 
 ## Commands
 
-```bash
-make              # Setup (default)
-make setup        # Create all symlinks
-make require      # Validate environment (read-only, fail-fast)
-make doctor       # Diagnose issues
-make help         # Show all targets
+```
+make              Setup (default)
+make require      Validate environment (read-only, fail-fast)
+make doctor       Diagnose issues
+make help         Show all targets
 ```
 
 ## What Gets Symlinked
 
 ```
-~/.gitconfig    → git/gitconfig
-~/.git-template → git/git-template
-~/.tmux.conf    → tmux/tmux.conf
-~/.vim          → vim/vim
-~/.vimrc        → vim/vimrc
-~/.zshenv       → zsh/zshenv
-~/.zprofile     → zsh/zprofile
-~/.zshrc        → zsh/zshrc
+~/.gitconfig      → git/gitconfig
+~/.git-template   → git/git-template
+~/.tmux.conf      → tmux/tmux.conf
+~/.vim            → vim/vim
+~/.vimrc          → vim/vimrc
+~/.zshenv         → zsh/zshenv
+~/.zprofile       → zsh/zprofile
+~/.zshrc          → zsh/zshrc
+~/.claude-env.sh  → claude/claude-env.sh
 ```
 
 ## Structure
@@ -43,6 +44,7 @@ dotfiles/
 ├── tmux/           # Tmux config
 ├── vim/            # Vim config + colorschemes
 ├── zsh/            # Zsh config (aliases, functions, env)
+├── claude/         # Claude Code environment
 ├── apt-get/        # System package list
 └── bin/            # Utility scripts
 ```
@@ -52,10 +54,4 @@ dotfiles/
 Set zsh as default shell:
 ```bash
 chsh -s $(which zsh)
-```
-
-Configure git identity (if not already set):
-```bash
-git config --global user.name "Your Name"
-git config --global user.email "you@example.com"
 ```
