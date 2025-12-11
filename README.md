@@ -10,7 +10,12 @@ cd ~/code/dotfiles
 make
 ```
 
-One-liner: `sudo apt-get update && sudo apt-get install -y make git && git clone git@github.com:corygabrielsen/dotfiles.git ~/code/dotfiles && cd ~/code/dotfiles && make`
+**One-liner** (fresh machine):
+```bash
+sudo apt-get update && sudo apt-get install -y make git && \
+git clone git@github.com:corygabrielsen/dotfiles.git ~/code/dotfiles && \
+cd ~/code/dotfiles && make
+```
 
 ## Commands
 
