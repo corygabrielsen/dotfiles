@@ -1,140 +1,61 @@
 # Dotfiles
 
-This repository contains my personal dotfiles and configurations for various
-tools and applications.
+Personal dotfiles managed via symlinks. Zero dependencies beyond `make` and `git`.
 
-## Contents
-
-- `apt-get`: List of package dependencies.
-- `git`: Git configuration files and hooks.
-- `tmux`: TMUX configuration files.
-- `vim`: Vim configuration files.
-- `zsh`: Z shell configuration files.
-
-## Installation
-
-To install these dotfiles, clone the repository and run:
+## Quick Start
 
 ```bash
-DIR=$HOME/code && \
-mkdir -p $DIR && \
-cd $DIR && \
-git clone --recursive git@github.com:stoooops/dotfiles.git && \
-cd $DIR/dotfiles && \
-yarn install && \
-yarn setup
+# Fresh machine
+sudo apt-get update && sudo apt-get install -y make git
+git clone git@github.com:corygabrielsen/dotfiles.git ~/code/dotfiles
+cd ~/code/dotfiles && make
 ```
 
-This will install dependencies and create symlinks for the dotfiles in the repository,
-linking them to the appropriate locations in your home directory.
-
-### One-liner
+## Commands
 
 ```bash
-(
-    DIR=$HOME/code;
-
-    prompt() { echo -e "\x1b[32m$1\x1b[0m"; sleep 1; echo -n "."; sleep 1; echo -n "."; sleep 1; echo -n "."; sleep 1; echo; }
-
-    install_base() {
-        sudo apt-get update && sudo apt-get install -y curl git zsh;
-        curl --version && git --version && zsh --version;
-    }
-
-    install_nvm() {
-        curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash;
-        export NVM_DIR="$HOME/.nvm";
-        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh";
-    }
-
-    install_node() {
-        nvm install 20 && nvm use 20;
-        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh";
-        echo "npm $(npm --version)"; echo "node $(node --version)";
-    }
-
-    install_yarn() { npm install -g yarn; }
-
-    clone_dotfiles() {
-        mkdir -p $DIR && cd $DIR;
-        git clone --recursive git@github.com:stoooops/dotfiles.git && cd dotfiles;
-    }
-
-    run_setup() {
-        yarn install && yarn setup;
-        chsh -s $(which zsh);
-        echo -e "\x1b[32mDone\x1b[0m";
-    }
-
-    [ -d "$DIR/dotfiles" ] && prompt "$DIR/dotfiles already exists" && exit 0 || true;
-
-    prompt "Installing curl, git, zsh" && install_base && \
-    prompt "Installing NVM" && install_nvm && \
-    prompt "Installing Node.js v20" && install_node && \
-    prompt "Installing yarn" && install_yarn && \
-    prompt "Cloning dotfiles" && clone_dotfiles && \
-    prompt "Installing dependencies and running setup" && run_setup
-)
+make              # Setup (default)
+make setup        # Create all symlinks
+make require      # Validate environment (read-only, fail-fast)
+make doctor       # Diagnose issues
+make help         # Show all targets
 ```
 
-### Fresh install
+## What Gets Symlinked
 
-From a new computer:
+```
+~/.gitconfig    → git/gitconfig
+~/.git-template → git/git-template
+~/.tmux.conf    → tmux/tmux.conf
+~/.vim          → vim/vim
+~/.vimrc        → vim/vimrc
+~/.zshenv       → zsh/zshenv
+~/.zprofile     → zsh/zprofile
+~/.zshrc        → zsh/zshrc
+```
 
-- install `curl`
+## Structure
 
-  ```bash
-  sudo apt-get install -y curl
-  ```
+```
+dotfiles/
+├── Makefile        # Setup orchestration
+├── git/            # Git config, aliases, hooks
+├── tmux/           # Tmux config
+├── vim/            # Vim config + colorschemes
+├── zsh/            # Zsh config (aliases, functions, env)
+├── apt-get/        # System package list
+└── bin/            # Utility scripts
+```
 
-- install `git`
+## Post-Setup
 
-  ```bash
-  sudo apt-get install -y git
-  ```
+Set zsh as default shell:
+```bash
+chsh -s $(which zsh)
+```
 
-- install `zsh`
-
-  ```bash
-  sudo apt-get install -y zsh
-  ```
-
-- install `nvm`
-
-  ```bash
-  curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash;
-  export NVM_DIR="$HOME/.nvm";
-  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh";
-  ```
-
-- install `node`
-
-  ```bash
-  nvm install 20 && nvm use 20;
-  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh";
-  echo "npm $(npm --version)"; echo "node $(node --version)";
-  ```
-
-- install yarn
-
-  ```bash
-  sudo npm install -g yarn
-  ```
-
-- Install dotfiles
-
-  1. clone repo
-  2. install dependencies
-  3. run setup
-  4. set zsh as default shell
-
-  ```bash
-  DIR=$HOME/code &&
-  mkdir -p $DIR && \
-  cd $DIR && \
-  git clone --recursive git@github.com:stoooops/dotfiles.git && \
-  cd dotfiles && \
-  yarn install && \
-  yarn setup && \
-  chsh -s $(which zsh)
-  ```
+Configure git identity (if not already set):
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+```
