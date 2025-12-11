@@ -148,11 +148,8 @@ fi
 # Source the API key file
 #
 
-# 1. -v '^#' removes all lines that start with a '#'
-# 2. xargs splits the lines into individual arguments
-# 3. export takes each argument and exports it as an environment variable
-touch $HOME/.api_keys.env
-export $(grep -v '^#' $HOME/.api_keys.env | xargs) > /dev/null
+# Source API keys if file exists
+[[ -f ~/.api_keys.env ]] && source ~/.api_keys.env
 
 
 
