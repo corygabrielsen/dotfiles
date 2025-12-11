@@ -61,7 +61,10 @@ export MAKEFLAGS="-j$(get_num_cores)"
 
 # Check if running under an AI agent
 is_ai_agent() {
-    [[ "$CURSOR_AGENT" == "1" ]] || [[ "$CLAUDE_AGENT" == "1" ]]
+    [[ -n "$CLAUDECODE" ]] || \
+    [[ -n "$CODEX_MANAGED_BY_NPM" ]] || \
+    [[ -n "$CURSOR_AGENT" ]] || \
+    [[ -n "$GEMINI_CLI" ]]
 }
 
 
@@ -687,12 +690,16 @@ srcdump() {
 # AI Agent Settings
 ###############################################################################
 #
-# Special settings for AI agents (Cursor, Claude, etc.)
+# Special settings for AI agents (Claude, Codex, Cursor, Gemini, etc.)
 # These settings optimize the shell for non-interactive automation
 #
-# Set one of these in your environment to enable AI agent mode:
-#   export CURSOR_AGENT=1  # For Cursor
-#   export CLAUDE_AGENT=1  # For Claude Desktop
+# Detected automatically via environment variables:
+#   CLAUDECODE=1           - Set by Claude Code
+#   CODEX_MANAGED_BY_NPM=1 - Set by OpenAI Codex
+#   CURSOR_AGENT=1         - Set by Cursor
+#   GEMINI_CLI=1           - Set by Google Gemini CLI
+#
+# Note: Claude Code also uses CLAUDE_ENV_FILE for per-command setup (see ~/.claude-env.sh)
 #
 
 if is_ai_agent; then
@@ -730,12 +737,15 @@ if is_ai_agent; then
     alias rsync="rsync --progress"
 
     # Separate history file for each agent
-    if [[ "$CURSOR_AGENT" == "1" ]]; then
-        export HISTFILE=~/.zsh_history_cursor
-    elif [[ "$CLAUDE_AGENT" == "1" ]]; then
+    if [[ -n "$CLAUDECODE" ]]; then
         export HISTFILE=~/.zsh_history_claude
+    elif [[ -n "$CODEX_MANAGED_BY_NPM" ]]; then
+        export HISTFILE=~/.zsh_history_codex
+    elif [[ -n "$CURSOR_AGENT" ]]; then
+        export HISTFILE=~/.zsh_history_cursor
+    elif [[ -n "$GEMINI_CLI" ]]; then
+        export HISTFILE=~/.zsh_history_gemini
     else
-        # Fallback for any future agents
         export HISTFILE=~/.zsh_history_agent
     fi
 
@@ -812,6 +822,33 @@ export NVM_DIR="$HOME/.nvm"
 #
 if command -v direnv >/dev/null 2>&1; then
     eval "$(direnv hook zsh)"
+
+    if is_ai_agent; then
+        # Cursor/LLM shells do not run an interactive prompt loop, so the
+        # standard direnv hook never fires. Manually export the environment to
+        # mirror what would normally happen before each prompt redraw.
+        direnv_llm_refresh() {
+            # Equivalent to the hook invoking `direnv export` for the current
+            # directory. This keeps project-specific variables like `CARGO_HOME`
+            # in sync even without a traditional prompt cycle.
+            eval "$(direnv export zsh)"
+        }
+
+        # Perform an initial export immediately after startup so the current
+        # working directory picks up its `.envrc` without waiting for a `cd`.
+        direnv_llm_refresh
+
+        cd() {
+            # Wrap builtin cd so every directory change re-runs the export.
+            # This replicates the normal `PROMPT`-triggered behavior from
+            # interactive shells while remaining transparent to callers.
+            if builtin cd "$@"; then
+                direnv_llm_refresh
+            else
+                return $?
+            fi
+        }
+    fi
 fi
 
 
@@ -826,4 +863,3 @@ fi
 if [[ -f "$HOME/.local/bin/env" ]]; then
     . "$HOME/.local/bin/env"
 fi
-
