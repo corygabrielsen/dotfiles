@@ -1,0 +1,115 @@
+#!/bin/bash
+# Guard against GPG signing in non-interactive shells (AI agents, scripts, etc.)
+# This prevents gpg-agent from hanging when it can't prompt for passphrase.
+
+# Check if GPG signing is even enabled
+if [ "$(git config --get commit.gpgsign)" != "true" ]; then
+    exit 0
+fi
+
+# If we have a TTY, GPG should work fine
+if [ -t 0 ] && [ -t 1 ]; then
+    exit 0
+fi
+
+# No GPG? No problem - let git handle the error naturally
+if ! command -v gpg >/dev/null 2>&1; then
+    exit 0
+fi
+
+# No signing key configured? Let git handle it
+signing_key=$(git config --get user.signingkey)
+if [ -z "$signing_key" ]; then
+    exit 0
+fi
+
+# Key doesn't exist locally? Let git handle it (new machine, etc.)
+if ! gpg --list-secret-keys "$signing_key" >/dev/null 2>&1; then
+    exit 0
+fi
+
+# Check if key is cached (no passphrase needed)
+is_key_cached() {
+    # gpg-connect-agent not available? Can't check, allow and hope for best
+    if ! command -v gpg-connect-agent >/dev/null 2>&1; then
+        return 0
+    fi
+
+    local keygrip=$(gpg --list-secret-keys --with-keygrip "$signing_key" 2>/dev/null | grep Keygrip | head -1 | awk '{print $3}')
+    if [ -z "$keygrip" ]; then
+        return 0  # Can't determine, allow
+    fi
+
+    # KEYINFO format: <keygrip> <type> <serialno> <idstr> <cached> <protection> <fpr> <ttl> <flags>
+    # Field 5 (cached): '1' if passphrase is cached, '-' if not
+    # Field 6 (protection): 'P' protected with passphrase, 'C' unprotected, '-' unknown
+    gpg-connect-agent "keyinfo $keygrip" /bye 2>/dev/null | grep -qE "KEYINFO $keygrip [A-Z] - - 1"
+}
+
+if is_key_cached; then
+    exit 0
+fi
+
+# Non-interactive shell detection
+is_non_interactive() {
+    [ -n "$CLAUDECODE" ] || \
+    [ -n "$CODEX_MANAGED_BY_NPM" ] || \
+    [ -n "$CURSOR_AGENT" ] || \
+    [ -n "$GEMINI_CLI" ] || \
+    ! tty -s 2>/dev/null
+}
+
+# Only block if: non-interactive + key exists + key not cached
+if is_non_interactive; then
+    keygrip=$(gpg --list-secret-keys --with-keygrip "$signing_key" 2>/dev/null | grep Keygrip | head -1 | awk '{print $3}')
+    cache_status=$(gpg-connect-agent "keyinfo $keygrip" /bye 2>/dev/null | grep KEYINFO)
+
+    # Colors
+    R=$'\033[0;31m'    # red
+    G=$'\033[0;32m'    # green
+    Y=$'\033[0;33m'    # yellow
+    B=$'\033[0;34m'    # blue
+    C=$'\033[0;36m'    # cyan
+    W=$'\033[1;37m'    # white bold
+    DIM=$'\033[0;90m'  # dim gray
+    N=$'\033[0m'       # reset
+
+    cat <<EOF
+
+${R}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${N}
+${R}ERROR:${N} ${W}GPG signing would hang in non-interactive shell${N}
+${R}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${N}
+
+The commit requires GPG signing but the key passphrase is not cached.
+In a non-interactive shell, GPG would hang waiting for input.
+
+${DIM}── git config ──${N}
+  commit.gpgsign  = $(git config --get commit.gpgsign)
+  user.signingkey = $signing_key
+
+${DIM}── gpg key status ──${N}
+  keygrip = $keygrip
+  cache   = $cache_status
+            ${DIM}(field 6: P=needs passphrase, C=cached)${N}
+
+${DIM}── environment ──${N}
+  CLAUDECODE           = ${CLAUDECODE:-<unset>}
+  CODEX_MANAGED_BY_NPM = ${CODEX_MANAGED_BY_NPM:-<unset>}
+  CURSOR_AGENT         = ${CURSOR_AGENT:-<unset>}
+  GEMINI_CLI           = ${GEMINI_CLI:-<unset>}
+  TTY                  = $(tty 2>&1 || true)
+
+${G}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${N}
+${G}QUICK FIX:${N}  ${W}Unlock your GPG key in another terminal:${N}
+
+  ${C}echo "test" | gpg --sign --local-user $signing_key >/dev/null${N}
+
+${DIM}── other options ──${N}
+  ${Y}git commit --no-gpg-sign${N}      ${DIM}# skip signing for this commit${N}
+  ${Y}git config commit.gpgsign false${N}  ${DIM}# disable for this repo${N}
+${G}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${N}
+EOF
+    exit 1
+fi
+
+exit 0
