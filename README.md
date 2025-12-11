@@ -50,8 +50,7 @@ dotfiles/
 ├── vim/            # Vim config + colorschemes
 ├── zsh/            # Zsh config (aliases, functions, env)
 ├── claude/         # Claude Code environment
-├── apt-get/        # System package list
-└── bin/            # Utility scripts
+└── apt-get/        # System package list
 ```
 
 ## Post-Setup
