@@ -22,3 +22,7 @@
 # Source local environment variables if the file exists
 [[ -f ~/.zshenv.local ]] && source ~/.zshenv.local
 
+# Claude Code environment file
+# This tells Claude Code to source ~/.claude-env.sh before each command
+export CLAUDE_ENV_FILE=~/.claude-env.sh
+
