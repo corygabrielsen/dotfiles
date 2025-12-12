@@ -1,20 +1,19 @@
+# Local secrets
 api_keys.env
-.prompt
 
+# OS
 .DS_Store
-node_modules
 
-# for now
-prompts
-
+# Python
 *.pyc
 
-# Configuration file for Vim's netrw file browsing plugin.
+# Vim
 vim/.netrwhist
-
-# swap files
 *.swp
 
-# IDE files
+# IDE
 .idea/
 .vscode/
+
+# Claude Code local settings
+.claude/
