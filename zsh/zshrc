@@ -294,7 +294,6 @@ alias gs="git st"
 alias gsg="git st"
 alias gstg="git st"
 alias gsts="git st"
-alias gt="git st"
 alias gts="git st"
 
 # switch
