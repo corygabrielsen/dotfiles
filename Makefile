@@ -41,6 +41,7 @@ _COLOR_BOLD := \033[1m
 SYMLINKS := \
 	gitconfig:git/gitconfig \
 	git-template:git/git-template \
+	profile:bash/profile \
 	tmux.conf:tmux/tmux.conf \
 	vim:vim/vim \
 	vimrc:vim/vimrc \
@@ -48,6 +49,11 @@ SYMLINKS := \
 	zprofile:zsh/zprofile \
 	zshrc:zsh/zshrc \
 	claude-env.sh:claude/claude-env.sh
+
+# Nested symlinks: full target path : source (relative to DOTFILES)
+NESTED_SYMLINKS := \
+	$(HOME)/.claude/statusline.sh:claude/statusline.sh \
+	$(HOME)/.claude/file-suggestion.sh:claude/file-suggestion.sh
 
 ###############################################################################
 # TIER 1: ORCHESTRATORS
@@ -83,11 +89,29 @@ install-symlinks:
 			ln -s "$(source)" "$(target)"; \
 			printf '  %b%s%b %s -> %s\n' '$(_COLOR_SUCCESS)' '✓' '$(_COLOR_RESET)' '$(target)' '$(source)'; \
 		fi;)
+	@$(foreach link,$(NESTED_SYMLINKS),\
+		$(eval target := $(word 1,$(subst :, ,$(link)))) \
+		$(eval source := $(DOTFILES)/$(word 2,$(subst :, ,$(link)))) \
+		mkdir -p "$$(dirname $(target))"; \
+		if [ -L "$(target)" ] && [ "$$(readlink $(target))" = "$(source)" ]; then \
+			printf '  %b%s%b %s\n' '$(_COLOR_SUCCESS)' '✓' '$(_COLOR_RESET)' '$(target)'; \
+		else \
+			rm -f "$(target)" 2>/dev/null || true; \
+			ln -s "$(source)" "$(target)"; \
+			printf '  %b%s%b %s -> %s\n' '$(_COLOR_SUCCESS)' '✓' '$(_COLOR_RESET)' '$(target)' '$(source)'; \
+		fi;)
 
 .PHONY: require-symlinks
 require-symlinks:
 	@$(foreach link,$(SYMLINKS),\
 		$(eval target := $(HOME)/.$(word 1,$(subst :, ,$(link)))) \
+		$(eval source := $(DOTFILES)/$(word 2,$(subst :, ,$(link)))) \
+		if [ ! -L "$(target)" ] || [ "$$(readlink $(target))" != "$(source)" ]; then \
+			printf '%b%s%b %s\n' '$(_COLOR_ERROR)' 'Error:' '$(_COLOR_RESET)' '$(target) not linked correctly'; \
+			exit 1; \
+		fi;)
+	@$(foreach link,$(NESTED_SYMLINKS),\
+		$(eval target := $(word 1,$(subst :, ,$(link)))) \
 		$(eval source := $(DOTFILES)/$(word 2,$(subst :, ,$(link)))) \
 		if [ ! -L "$(target)" ] || [ "$$(readlink $(target))" != "$(source)" ]; then \
 			printf '%b%s%b %s\n' '$(_COLOR_ERROR)' 'Error:' '$(_COLOR_RESET)' '$(target) not linked correctly'; \
@@ -100,6 +124,21 @@ doctor-symlinks:
 	@printf '%b%s%b\n' '$(_COLOR_BOLD)' 'symlinks' '$(_COLOR_RESET)'
 	@$(foreach link,$(SYMLINKS),\
 		$(eval target := $(HOME)/.$(word 1,$(subst :, ,$(link)))) \
+		$(eval source := $(DOTFILES)/$(word 2,$(subst :, ,$(link)))) \
+		if [ -L "$(target)" ] && [ "$$(readlink $(target))" = "$(source)" ]; then \
+			printf '  %b%s%b %s\n' '$(_COLOR_SUCCESS)' '✓' '$(_COLOR_RESET)' '$(target)'; \
+		elif [ -L "$(target)" ]; then \
+			printf '  %b%s%b %s (wrong target: %s)\n' '$(_COLOR_WARN)' '!' '$(_COLOR_RESET)' '$(target)' "$$(readlink $(target))"; \
+			printf '  %b%s%b\n' '$(_COLOR_DIM)' '  Fix: make install-symlinks' '$(_COLOR_RESET)'; \
+		elif [ -e "$(target)" ]; then \
+			printf '  %b%s%b %s (exists but not a symlink)\n' '$(_COLOR_WARN)' '!' '$(_COLOR_RESET)' '$(target)'; \
+			printf '  %b%s%b\n' '$(_COLOR_DIM)' '  Fix: rm $(target) && make install-symlinks' '$(_COLOR_RESET)'; \
+		else \
+			printf '  %b%s%b %s (missing)\n' '$(_COLOR_ERROR)' '✗' '$(_COLOR_RESET)' '$(target)'; \
+			printf '  %b%s%b\n' '$(_COLOR_DIM)' '  Fix: make install-symlinks' '$(_COLOR_RESET)'; \
+		fi;)
+	@$(foreach link,$(NESTED_SYMLINKS),\
+		$(eval target := $(word 1,$(subst :, ,$(link)))) \
 		$(eval source := $(DOTFILES)/$(word 2,$(subst :, ,$(link)))) \
 		if [ -L "$(target)" ] && [ "$$(readlink $(target))" = "$(source)" ]; then \
 			printf '  %b%s%b %s\n' '$(_COLOR_SUCCESS)' '✓' '$(_COLOR_RESET)' '$(target)'; \
