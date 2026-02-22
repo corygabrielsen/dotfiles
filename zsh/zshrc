@@ -592,6 +592,100 @@ fi
 # Custom functions
 ###############################################################################
 
+# Play a tone - cross-platform (WSL, macOS, Linux)
+# Usage: beep [frequency_hz] [duration_ms]
+beep() {
+    local freq=${1:-800}
+    local duration=${2:-200}
+    local duration_sec=$(echo "scale=3; $duration / 1000" | bc)
+
+    if [[ -n "$WSL_INTEROP" ]] || grep -qi microsoft /proc/version 2>/dev/null; then
+        # WSL - use Windows PowerShell
+        powershell.exe -c "[Console]::Beep($freq, $duration)" 2>/dev/null
+    elif [[ "$OSTYPE" == darwin* ]]; then
+        # macOS - use afplay with generated tone, or fall back to terminal bell
+        if command -v sox &>/dev/null; then
+            play -q -n synth "$duration_sec" sine "$freq" 2>/dev/null
+        elif command -v ffplay &>/dev/null; then
+            ffplay -f lavfi -t "$duration_sec" -nodisp -autoexit -loglevel quiet \
+                "sine=frequency=$freq:duration=$duration_sec" 2>/dev/null
+        else
+            # Fallback: terminal bell (no frequency control)
+            printf '\a'
+        fi
+    else
+        # Linux - try various methods
+        if command -v sox &>/dev/null || command -v play &>/dev/null; then
+            play -q -n synth "$duration_sec" sine "$freq" 2>/dev/null
+        elif command -v beep &>/dev/null; then
+            beep -f "$freq" -l "$duration" 2>/dev/null
+        elif command -v ffplay &>/dev/null; then
+            ffplay -f lavfi -t "$duration_sec" -nodisp -autoexit -loglevel quiet \
+                "sine=frequency=$freq:duration=$duration_sec" 2>/dev/null
+        elif command -v speaker-test &>/dev/null; then
+            timeout "${duration_sec}s" speaker-test -t sine -f "$freq" &>/dev/null
+        else
+            # Fallback: terminal bell
+            printf '\a'
+        fi
+    fi
+}
+
+# Play system notification sound - cross-platform (WSL, macOS, Linux)
+# Usage: ding [sound_name]
+# WSL sounds: Asterisk, Beep, Exclamation, Hand, Question
+# macOS sounds: Basso, Blow, Bottle, Frog, Funk, Glass, Hero, Morse, Ping, Pop, Purr, Sosumi, Submarine, Tink
+# Linux: uses freedesktop sound theme
+ding() {
+    local sound=${1:-}
+
+    if [[ -n "$WSL_INTEROP" ]] || grep -qi microsoft /proc/version 2>/dev/null; then
+        # WSL - use Windows system sounds
+        local win_sound=${sound:-Asterisk}
+        powershell.exe -c "[System.Media.SystemSounds]::${win_sound}.Play()" 2>/dev/null
+    elif [[ "$OSTYPE" == darwin* ]]; then
+        # macOS - play system sounds from /System/Library/Sounds
+        local mac_sound=${sound:-Glass}
+        local sound_file="/System/Library/Sounds/${mac_sound}.aiff"
+        if [[ -f "$sound_file" ]]; then
+            afplay "$sound_file" 2>/dev/null
+        else
+            # List available if not found
+            echo "Sound '$mac_sound' not found. Available sounds:"
+            ls /System/Library/Sounds/*.aiff 2>/dev/null | xargs -n1 basename | sed 's/.aiff$//'
+            return 1
+        fi
+    else
+        # Linux - try freedesktop sounds or paplay
+        local linux_sound=${sound:-complete}
+        if command -v paplay &>/dev/null; then
+            # Try common locations for notification sounds
+            for dir in /usr/share/sounds/freedesktop/stereo \
+                       /usr/share/sounds/gnome/default/alerts \
+                       /usr/share/sounds/ubuntu/stereo; do
+                if [[ -f "$dir/${linux_sound}.oga" ]]; then
+                    paplay "$dir/${linux_sound}.oga" 2>/dev/null
+                    return 0
+                elif [[ -f "$dir/${linux_sound}.ogg" ]]; then
+                    paplay "$dir/${linux_sound}.ogg" 2>/dev/null
+                    return 0
+                elif [[ -f "$dir/${linux_sound}.wav" ]]; then
+                    paplay "$dir/${linux_sound}.wav" 2>/dev/null
+                    return 0
+                fi
+            done
+            # Default freedesktop notification
+            paplay /usr/share/sounds/freedesktop/stereo/complete.oga 2>/dev/null || \
+            paplay /usr/share/sounds/freedesktop/stereo/bell.oga 2>/dev/null || \
+            printf '\a'
+        elif command -v aplay &>/dev/null; then
+            aplay /usr/share/sounds/alsa/Front_Center.wav 2>/dev/null || printf '\a'
+        else
+            printf '\a'
+        fi
+    fi
+}
+
 # Copy standard input to clipboard and display on terminal.
 ctrlc() {
     tee >(xclip -sel clip) "$@" && echo "\n📋 Copied to clipboard"
