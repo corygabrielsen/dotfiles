@@ -15,5 +15,8 @@ vim/.netrwhist
 .idea/
 .vscode/
 
+# tint (per-directory terminal color)
+.tint
+
 # Claude Code local settings
 .claude/

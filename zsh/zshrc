@@ -70,49 +70,18 @@ is_ai_agent() {
 
 
 ################################################################################
-# Terminal background color
+# tint
 ################################################################################
-function set_background_color() {
-    # Try different methods to get a unique machine identifier
-    if [[ -f "/etc/machine-id" ]]; then
-        machine_id=$(cat /etc/machine-id)
-    elif [[ -f "/var/lib/dbus/machine-id" ]]; then
-        machine_id=$(cat /var/lib/dbus/machine-id)
-    elif [[ "${OSTYPE}" == "darwin"* ]]; then
-        # Use hardware UUID on macOS
-        machine_id=$(ioreg -d2 -c IOPlatformExpertDevice | awk -F\" '/IOPlatformUUID/{print $(NF-1)}')
-    else
-        # Fallback to hostname if no other identifier is available
-        machine_id=$(hostname)
-    fi
-
-    # Get first digit of md5 hash
-    digit=$(echo -n "$machine_id" | md5sum 2>/dev/null || echo -n "$machine_id" | md5 2>/dev/null | tr -d -c 0-9 | cut -c1)
-
-    case "$digit" in
-        0) color="#282a36" ;; # Dracula background
-        1) color="#2E3440" ;; # Nord Polar Night
-        2) color="#1D2021" ;; # Gruvbox dark background
-        3) color="#262626" ;; # Base16 grayscale dark
-        4) color="#272822" ;; # Monokai background
-        5) color="#002b36" ;; # Solarized background
-        6) color="#1e1e1e" ;; # Visual Studio Dark Theme
-        7) color="#3C3C3C" ;; # Visual Studio 2019 Dark Theme
-        8) color="#002240" ;; # Atom One Dark Theme
-        9) color="#282C34" ;; # Dark+ (default dark) VSCode
-        *) color="#1E1E1E" ;; # default to Visual Studio Dark Theme
-    esac
-    echo -e "\033]11;$color\007"
-}
-# Call the function at the end of .zshrc to set the background color whenever a terminal is opened.
-export TERMINAL_COLOR=$(set_background_color)
-echo -e "\033]11;$TERMINAL_COLOR\007"
-# A wrapper for ssh
-function ssh() {
-    local color_before_ssh=$TERMINAL_COLOR
-    /usr/bin/ssh "$@"
-    echo -e "\033]11;$color_before_ssh\007"
-}
+#
+# tint is a terminal background color picker. The hook auto-applies colors
+# per directory via .tint files (walks up from $PWD to /).
+#
+# Install: curl -fsSL https://github.com/corygabrielsen/tint/releases/latest/download/tint \
+#            -o ~/.local/bin/tint && chmod +x ~/.local/bin/tint
+#
+if command -v tint >/dev/null 2>&1; then
+    eval "$(tint hook zsh)"
+fi
 
 
 
