@@ -69,19 +69,6 @@ is_ai_agent() {
 
 
 
-################################################################################
-# tint
-################################################################################
-#
-# tint is a terminal background color picker. The hook auto-applies colors
-# per directory via .tint files (walks up from $PWD to /).
-#
-# Install: curl -fsSL https://github.com/corygabrielsen/tint/releases/latest/download/tint \
-#            -o ~/.local/bin/tint && chmod +x ~/.local/bin/tint
-#
-if command -v tint >/dev/null 2>&1; then
-    eval "$(tint hook zsh)"
-fi
 
 
 
@@ -964,4 +951,30 @@ fi
 if [[ -f "$HOME/.local/bin/env" ]]; then
     . "$HOME/.local/bin/env"
 fi
+
+
+################################################################################
+# tint
+################################################################################
+#
+# tint is a terminal background color picker. The hook auto-applies colors
+# per directory via .tint files (walks up from $PWD to /).
+#
+# Install: curl -fsSL https://github.com/corygabrielsen/tint/releases/latest/download/tint \
+#            -o ~/.local/bin/tint && chmod +x ~/.local/bin/tint
+#
+if command -v tint >/dev/null 2>&1; then
+    eval "$(tint hook zsh)"
+    eval "$(tint completions zsh)"
+fi
+
+
+################################################################################
+# Local overrides
+################################################################################
+#
+# Machine-specific functions, aliases, and settings that don't belong in the
+# shared dotfiles repo. Sourced last so it can override anything above.
+#
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
