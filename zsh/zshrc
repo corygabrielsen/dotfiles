@@ -1,22 +1,11 @@
 #!/usr/bin/env zsh
 #
-# The ~/.zshrc file is a configuration file for the Z shell (zsh) that is
-# sourced (executed) for interactive shells. It is used to define settings,
-# aliases, functions, and keybindings that should be set when you start an
-# interactive shell, such as a terminal window.
+# The ~/.zshrc file is sourced for interactive shells only. It configures the
+# appearance and behavior of the shell: prompt, aliases, keybindings, history,
+# and completions.
 #
-# This file can contain commands, options, and keybindings that produce output
-# or modify the shell. It is intended to be used to customize the appearance
-# and behavior of the shell, including setting the prompt, defining aliases,
-# and setting options.
-#
-# The ~/.zshrc file is only sourced for interactive shells, and is not sourced
-# for login shells or non-login shells. It is not the correct place to set
-# environment variables or commands that should be run for all invocations of
-# the shell. These should be set in the ~/.zshenv file instead.
-#
-# To use the ~/.zshrc file, you can create a symlink to the file in your home
-# directory using the ln command:
+# Environment variables and PATH setup belong in ~/.zshenv (sourced for ALL
+# shell invocations, including scripts, git hooks, and editor subprocesses).
 #
 #   ln -s path/to/dotfiles/zsh/zshrc ~/.zshrc
 #
@@ -24,10 +13,8 @@
 
 
 ################################################################################
-# Environment Variables
+# Interactive Environment
 ################################################################################
-
-export LANG=en_US.UTF-8
 
 export UID=$(id -u)
 export GID=$(id -g)
@@ -39,25 +26,10 @@ if ! is_ai_agent 2>/dev/null; then
     export LESS=-R
 fi
 
-# gpg
-export GPG_TTY=$(tty)
-
 # history
 export HISTFILE=~/.zsh_history
 export HISTSIZE=16000 # spots for duplicates/uniques
 export SAVEHIST=15000 # unique events guaranteed
-
-# build tools - use all available cores for parallel compilation (cross-platform)
-get_num_cores() {
-    if command -v nproc >/dev/null 2>&1; then
-        nproc
-    elif [[ "${OSTYPE}" == "darwin"* ]]; then
-        sysctl -n hw.ncpu
-    else
-        getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1
-    fi
-}
-export MAKEFLAGS="-j$(get_num_cores)"
 
 # Check if running under an AI agent
 is_ai_agent() {
@@ -69,42 +41,10 @@ is_ai_agent() {
 
 
 
-
-
-
-################################################################################
-# X Server
-#################################################################################
-#
-# X Server is required for GUI applications to run.
-#
-# The DISPLAY environment variable is used to specify the X server to connect to.
-# The format is host:display.screen, where host is the hostname of the machine
-# running the X server, display is the display number, and screen is the screen
-# number.
-#
-
-if [[ "${OSTYPE}" == "darwin"* ]]; then
-    # macOS
-    export DISPLAY=$(ipconfig getifaddr en0):0
-elif [[ "${OSTYPE}" == "linux-gnu"* ]]; then
-    # Linux
-    # export DISPLAY=:0
-else
-    # Unknown.
-    export DISPLAY=:0
-fi
-
-
-
 ###############################################################################
 # API Keys
 ###############################################################################
-#
-# Source the API key file
-#
 
-# Source API keys if file exists
 [[ -f ~/.api_keys.env ]] && source ~/.api_keys.env
 
 
@@ -137,8 +77,6 @@ dirdump() {
 }
 
 gst() {
-    # check if in a git repo
-    # git rev-parse --git-dir 2>/dev/null ||
     if [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" ]; then
         git st
     else
@@ -148,20 +86,15 @@ gst() {
 
 ga() {
     if [ $# -eq 0 ]; then
-        # if no args are passed, run `git add .`
         dirdump
     elif [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" ]; then
-        # in a git repo so add then run status
         git add "$@"
-        # log what was added
-        # TODO can enhance when . is passed to print what was added
         for arg in "$@"; do
             echo "➕ $arg"
         done
         echo
         git st
     else
-        # not in a git repo so just run ls
         dirdump
     fi
 }
@@ -241,7 +174,6 @@ alias tgpu="git pu"
 
 # status
 alias gss="git ss"
-# check if in repo and run ls if not run `git status`
 alias gstu="git stu"
 alias gstb="git stb"
 # typos
@@ -335,7 +267,6 @@ alias yt="yarn test"
 # Sublime Text
 ###############################################################################
 
-# Run Sublime Text in another session
 alias subl="setsid subl"
 
 
@@ -370,7 +301,7 @@ DARK_GRAY="\033[38;5;59m"
 
 
 ###############################################################################
-# Options that enable or disable shell behavior:
+# Shell Options
 ###############################################################################
 
 # Save command history with timestamps and duration
@@ -391,81 +322,19 @@ setopt share_history
 # Don't automatically change directories when entering a directory name
 unsetopt autocd
 
-
-
-###############################################################################
-# Options that enable or disable shell prompts:
-###############################################################################
-
 # Enable prompt string substitution
 setopt PROMPT_SUBST
 
-#
-# Options that enable or disable shell features:
-#
-
-# Enable spelling correction for commands
-# setopt correct
-
-# Enable automatic cd to directories without typing "cd"
-# setopt autocd
-
-#
-# Options that control the history file:
-#
-
-# Append new history lines rather than replacing existing ones
-# setopt hist_append
-
-# Append history immediately rather than waiting until the session is terminated
-# setopt immediate_history
-
-# Don't save command history with timestamps and duration
-# unsetopt extended_history
-
-# Don't incrementally add new history lines
-# unsetopt inc_append_history
-
-# Don't expire duplicates first when history is full
-# unsetopt hist_expire_dups_first
-
-# Execute history expansion immediately rather than verifying first
-# unsetopt hist_verify
-
-# Don't share history between instances of the shell
-# unsetopt share_history
-
-# Disable prompt string substitution
-# unsetopt PROMPT_SUBST
-
 
 
 ###############################################################################
-# Configuring bindkey Utility
+# Keybindings
 ###############################################################################
 
-# Set default command line editing mode to vi
-# set editing-mode vi
-
-# Set default keymap to vi-command
-# set keymap vi-command
-
-# Set bindkey utility to operate in vi command mode
+# vi command mode
 bindkey -v
 
-# Set key binding for Ctrl-Y to yank (copy) rest of line in vi insert mode
-# bindkey -M viins '^Y' vi-yank-eol
-
-# Set key binding for Ctrl-L to clear screen
-# bindkey '^L' clear-screen
-
-# Set key binding for Ctrl-D to delete character under cursor
-# bindkey '^D' delete-char
-
-# Set key binding for Ctrl-W to delete previous word
-# bindkey '^W' backward-kill-word
-
-# Set key binding for Ctrl-R to perform incremental search backward through command history
+# Ctrl-R to perform incremental search backward through command history
 bindkey '^R' history-incremental-search-backward
 
 
@@ -473,10 +342,6 @@ bindkey '^R' history-incremental-search-backward
 ###############################################################################
 # PS1 prompt
 ###############################################################################
-#
-# PS1 controls the prompt. It is set in zshrc since it is only sourced in
-# interactive shells.
-#
 
 # Display the current git branch
 parse_git_branch() {
@@ -513,7 +378,6 @@ parse_git_changes() {
 # Display the current git branch and any uncommitted changes
 parse_git() {
     if ! git rev-parse --git-dir > /dev/null 2>&1; then
-        # We are not in a Git repository
         return
     fi
     local branch="$(parse_git_branch)"
@@ -526,10 +390,8 @@ parse_git() {
 # Function to determine whether the current user is root
 parse_command_prompt() {
   if [[ $EUID -eq 0 ]]; then
-    # Root user
     echo "%{$BRIGHT_RED%}#%{$ENDC%}"
   else
-    # Non-root user
     echo "%{$WHITE%}$%{$ENDC%}"
   fi
 }
@@ -541,37 +403,15 @@ format_homedir() {
     local home_len=${#home}
     local dir_len=${#dir}
     if [[ "${dir}" == "${HOME}" ]]; then
-        # Current working directory is home
         echo -n "%{$BLUE%}~%{$ENDC%}"
     elif [[ "${dir}" == "${HOME}/"* ]]; then
-        # Current working directory is subdirectory of home
         echo -n "%{$LIME%}~%{$ENDC%}%{$TURQUOISE%}${dir:$home_len}%{$ENDC%}"
     else
-        # Current working directory is outside of home
         echo -n "%{$ORANGE%}$dir%{$ENDC%}"
     fi
 }
 
-# Set the prompt
 PS1='$(format_homedir)$(parse_git) $(parse_command_prompt) '
-
-
-
-################################################################################
-# pyenv
-################################################################################
-#
-# This is the recommended way to set up Pyenv in your shell.
-#
-# bash
-# https://github.com/pyenv/pyenv/issues/1906#issuecomment-835027647
-#
-# zsh
-# https://github.com/pyenv/pyenv/issues/1906#issuecomment-839556656
-#
-if command -v pyenv 1>/dev/null 2>&1; then
-    eval "$(pyenv init -)"
-fi
 
 
 
@@ -597,7 +437,6 @@ beep() {
             ffplay -f lavfi -t "$duration_sec" -nodisp -autoexit -loglevel quiet \
                 "sine=frequency=$freq:duration=$duration_sec" 2>/dev/null
         else
-            # Fallback: terminal bell (no frequency control)
             printf '\a'
         fi
     else
@@ -612,7 +451,6 @@ beep() {
         elif command -v speaker-test &>/dev/null; then
             timeout "${duration_sec}s" speaker-test -t sine -f "$freq" &>/dev/null
         else
-            # Fallback: terminal bell
             printf '\a'
         fi
     fi
@@ -627,26 +465,21 @@ ding() {
     local sound=${1:-}
 
     if [[ -n "$WSL_INTEROP" ]] || grep -qi microsoft /proc/version 2>/dev/null; then
-        # WSL - use Windows system sounds
         local win_sound=${sound:-Asterisk}
         powershell.exe -c "[System.Media.SystemSounds]::${win_sound}.Play()" 2>/dev/null
     elif [[ "$OSTYPE" == darwin* ]]; then
-        # macOS - play system sounds from /System/Library/Sounds
         local mac_sound=${sound:-Glass}
         local sound_file="/System/Library/Sounds/${mac_sound}.aiff"
         if [[ -f "$sound_file" ]]; then
             afplay "$sound_file" 2>/dev/null
         else
-            # List available if not found
             echo "Sound '$mac_sound' not found. Available sounds:"
             ls /System/Library/Sounds/*.aiff 2>/dev/null | xargs -n1 basename | sed 's/.aiff$//'
             return 1
         fi
     else
-        # Linux - try freedesktop sounds or paplay
         local linux_sound=${sound:-complete}
         if command -v paplay &>/dev/null; then
-            # Try common locations for notification sounds
             for dir in /usr/share/sounds/freedesktop/stereo \
                        /usr/share/sounds/gnome/default/alerts \
                        /usr/share/sounds/ubuntu/stereo; do
@@ -661,7 +494,6 @@ ding() {
                     return 0
                 fi
             done
-            # Default freedesktop notification
             paplay /usr/share/sounds/freedesktop/stereo/complete.oga 2>/dev/null || \
             paplay /usr/share/sounds/freedesktop/stereo/bell.oga 2>/dev/null || \
             printf '\a'
@@ -706,7 +538,6 @@ extract() {
     fi
 }
 
-
 # 1. Find all files and directories under the current directory, sorted alphabetically
 # 2. Replace the "." with the basename of the current directory
 # 3. Append a "/" to the end of each directory name
@@ -730,6 +561,7 @@ srcdump() {
   dump |
   grep -vE "(.git|.next|build|cache|coverage|dist|log|logs|node_modules|out|site|tmp|venv)"
 }
+
 
 
 ###############################################################################
@@ -795,7 +627,7 @@ if is_ai_agent; then
         export HISTFILE=~/.zsh_history_agent
     fi
 
-        # Environment variables for non-interactive operation
+    # Environment variables for non-interactive operation
     export DEBIAN_FRONTEND=noninteractive
     export PYTHONUNBUFFERED=1
 
@@ -806,11 +638,7 @@ fi
 ################################################################################
 # tmux
 ################################################################################
-#
-# tmux is a terminal multiplexer. It lets you switch easily between several
-# programs in one terminal, detach them (they keep running in the background)
-# and reattach them to a different terminal.
-#
+
 if [ -z "${TMUX}" ]; then
     export PATH=/usr/bin:${HOME}/bin:/usr/local/bin:${PATH}
 fi
@@ -818,59 +646,29 @@ fi
 
 
 ################################################################################
-# Homebrew (Linuxbrew)
+# nvm (interactive)
 ################################################################################
-if [[ -d /home/linuxbrew/.linuxbrew ]]; then
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
-fi
+# NVM_DIR and PATH are set in .zshenv. This loads the full nvm command
+# for interactive use (nvm use, nvm install, etc.)
 
-
-
-################################################################################
-# go
-################################################################################
-#
-# https://golang.org/doc/install#install
-#
-# Go lives in /usr/local/go
-#
-if [ -d /usr/local/go ]; then
-    export PATH=${PATH}:/usr/local/go/bin
-    export GOPATH=${HOME}/go
-fi
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
 
 
 ################################################################################
-# nvm
+# bun (completions)
 ################################################################################
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# BUN_INSTALL and PATH are set in .zshenv.
 
-
-
-################################################################################
-# bun
-################################################################################
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
-
-
-
-################################################################################
-# opencode
-################################################################################
-if [[ -d "$HOME/.opencode/bin" ]]; then
-    export PATH="$HOME/.opencode/bin:$PATH"
-fi
 
 
 
 ################################################################################
 # podman
 ################################################################################
+
 if command -v podman-compose &>/dev/null; then
   export PODMAN_COMPOSE_PROVIDER=$(command -v podman-compose)
 fi
@@ -878,58 +676,21 @@ fi
 
 
 ################################################################################
-# rust
-################################################################################
-#
-# Rust toolchain and related tools
-#
-
-# Source cargo environment if it exists
-if [[ -f "$HOME/.cargo/env" ]]; then
-    . "$HOME/.cargo/env"
-fi
-
-# Add foundry to PATH if it exists
-# Check common installation paths across different systems
-for foundry_path in "$HOME/.foundry/bin" "/usr/local/foundry/bin"; do
-    if [[ -d "$foundry_path" ]]; then
-        export PATH="$PATH:$foundry_path"
-        break
-    fi
-done
-
-
-
-################################################################################
 # direnv
 ################################################################################
-#
-# direnv is an environment switcher for the shell. It knows how to hook into
-# bash, zsh, tcsh, fish shell and elvish to load or unload environment variables
-# depending on the current directory.
-#
+
 if command -v direnv >/dev/null 2>&1; then
     eval "$(direnv hook zsh)"
 
     if is_ai_agent; then
-        # Cursor/LLM shells do not run an interactive prompt loop, so the
-        # standard direnv hook never fires. Manually export the environment to
-        # mirror what would normally happen before each prompt redraw.
         direnv_llm_refresh() {
-            # Equivalent to the hook invoking `direnv export` for the current
-            # directory. This keeps project-specific variables like `CARGO_HOME`
-            # in sync even without a traditional prompt cycle.
             eval "$(direnv export zsh)"
         }
 
-        # Perform an initial export immediately after startup so the current
-        # working directory picks up its `.envrc` without waiting for a `cd`.
+        # Initial export so current directory picks up .envrc immediately
         direnv_llm_refresh
 
         cd() {
-            # Wrap builtin cd so every directory change re-runs the export.
-            # This replicates the normal `PROMPT`-triggered behavior from
-            # interactive shells while remaining transparent to callers.
             if builtin cd "$@"; then
                 direnv_llm_refresh
             else
@@ -940,33 +701,19 @@ if command -v direnv >/dev/null 2>&1; then
 fi
 
 
-################################################################################
-# User-specific binaries and scripts
-################################################################################
-#
-# ~/.local/bin is the standard location for user-specific executables and scripts
-# following the XDG Base Directory Specification. This directory is meant for
-# binaries and scripts that should only be available to the current user.
-#
-if [[ -f "$HOME/.local/bin/env" ]]; then
-    . "$HOME/.local/bin/env"
-fi
-
 
 ################################################################################
 # tint
 ################################################################################
 #
-# tint is a terminal background color picker. The hook auto-applies colors
-# per directory via .tint files (walks up from $PWD to /).
-#
-# Install: curl -fsSL https://github.com/corygabrielsen/tint/releases/latest/download/tint \
-#            -o ~/.local/bin/tint && chmod +x ~/.local/bin/tint
+# Terminal background color picker. Auto-applies colors per directory via
+# .tint files (walks up from $PWD to /).
 #
 if command -v tint >/dev/null 2>&1; then
     eval "$(tint hook zsh)"
     eval "$(tint completions zsh)"
 fi
+
 
 
 ################################################################################
@@ -977,4 +724,3 @@ fi
 # shared dotfiles repo. Sourced last so it can override anything above.
 #
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
-
