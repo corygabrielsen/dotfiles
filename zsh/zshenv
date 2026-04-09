@@ -18,6 +18,9 @@
 # This tells Claude Code to source ~/.claude-env.sh before each command
 export CLAUDE_ENV_FILE=~/.claude-env.sh
 
+# Disable Claude Code's terminal flicker-on-redraw
+export CLAUDE_CODE_NO_FLICKER=1
+
 
 
 ###############################################################################
