@@ -279,22 +279,20 @@ RED="\033[0;31m"
 BRIGHT_RED="\033[1;31m"
 GREEN="\033[0;32m"
 YELLOW="\033[0;33m"
-YELLOWISH="\033[38;5;220m"
+BRIGHT_YELLOW="\033[93m"
 BLUE="\033[0;34m"
 MAGENTA="\033[0;35m"
 CYAN="\033[0;36m"
 WHITE="\033[0;37m"
 ENDC="\033[0m"
 NC="\033[0m"
-# 256 colors
-# https://jonasjacek.github.io/colors/
-ORANGE="\033[38;5;166m"
-PURPLE="\033[38;5;141m"
+# bright variants (c8-c15)
+BRIGHT_GREEN="\033[92m"
+BRIGHT_MAGENTA="\033[95m"
+BRIGHT_CYAN="\033[96m"
+# extras (256-color palette)
 PINK="\033[38;5;217m"
 BROWN="\033[38;5;130m"
-LIME="\033[38;5;154m"
-BRIGHT_GREEN="\033[38;5;118m"
-TURQUOISE="\033[38;5;45m"
 LIGHT_BLUE="\033[38;5;39m"
 DARK_GRAY="\033[38;5;59m"
 
@@ -353,7 +351,7 @@ parse_git_branch() {
         if [ "${branch_name}" = "master" ]; then
             echo "%{$MAGENTA%}(${branch_name})%{$ENDC%}"
         else
-            echo "%{$PURPLE%}(${branch_name})%{$ENDC%}"
+            echo "%{$BRIGHT_MAGENTA%}(${branch_name})%{$ENDC%}"
         fi
     fi
 }
@@ -371,7 +369,7 @@ parse_git_changes() {
         echo -n "%{$CYAN%}+${num_untracked_files}%{$ENDC%}"
     fi
     if [ "${num_modified_files}" -gt 0 ]; then
-        echo -n "%{$YELLOWISH%}~${num_modified_files}%{$ENDC%}"
+        echo -n "%{$BRIGHT_YELLOW%}~${num_modified_files}%{$ENDC%}"
     fi
 }
 
@@ -405,9 +403,9 @@ format_homedir() {
     if [[ "${dir}" == "${HOME}" ]]; then
         echo -n "%{$BLUE%}~%{$ENDC%}"
     elif [[ "${dir}" == "${HOME}/"* ]]; then
-        echo -n "%{$LIME%}~%{$ENDC%}%{$TURQUOISE%}${dir:$home_len}%{$ENDC%}"
+        echo -n "%{$BRIGHT_GREEN%}~%{$ENDC%}%{$BRIGHT_CYAN%}${dir:$home_len}%{$ENDC%}"
     else
-        echo -n "%{$ORANGE%}$dir%{$ENDC%}"
+        echo -n "%{$YELLOW%}$dir%{$ENDC%}"
     fi
 }
 
