@@ -1,241 +1,223 @@
-#!/bin/bash
+#!/bin/sh
 # =============================================================================
-# Claude Code Status Line
+# statusline.sh - Claude Code status line renderer
 # =============================================================================
 #
-# Custom status line for Claude Code CLI that mirrors zsh PS1 styling and adds
-# session metrics. Designed to feel native while surfacing important warnings.
+# Compatibility:
+#   POSIX shell (sh, dash, ash, bash). Requires git, jq, and a terminal
+#   that supports ANSI color escapes.
 #
-# CONFIGURATION
+# Configuration:
 #   ~/.claude/settings.json:
-#   {
 #     "statusLine": {
 #       "type": "command",
 #       "command": "~/.claude/statusline.sh"
 #     }
-#   }
 #
-# PROTOCOL
-#   Input:  JSON on stdin with session context (see INPUT SCHEMA below)
-#   Output: Single line of ANSI-colored text on stdout
+# Protocol:
+#   Stdin:  JSON session context emitted by Claude Code.
+#   Stdout: One line of ANSI-colored text.
 #
-# INPUT SCHEMA (partial - only fields we use)
-#   {
-#     "workspace": { "current_dir": "/path/to/cwd" },
-#     "context_window": { "used_percentage": 42 },
-#     "cost": {
-#       "total_cost_usd": 12.34,
-#       "total_lines_added": 100,
-#       "total_lines_removed": 50
-#     }
-#   }
+# Input fields used (others ignored):
+#   .workspace.current_dir          path
+#   .context_window.used_percentage 0-100
+#   .cost.total_cost_usd            USD
+#   .cost.total_lines_added         int
+#   .cost.total_lines_removed       int
 #
-# OUTPUT FORMAT
-#   Normal:  ~/code/project (master)  42%  +100 -50
-#   Warning: ~/code/project (master)  42%  +100 -50  ⚠ API $12.34
+# Output format:
+#   ~/code/project (master) +5 ~3   42%  +100 -50
+#   With auth warning appended when subscription is not "max".
 #
-# DESIGN PHILOSOPHY
-#   - Directory/git colors match user's zsh PS1 (visual consistency)
-#   - Metadata (context %, lines) uses subdued colors (information, not alerts)
-#   - Auth warning only appears when NOT on max subscription (alert on exception)
-#   - Context % uses gradient: green → yellow → orange → red as it fills
+# Design:
+#   - Directory and git colors mirror the user's zsh PS1 for visual
+#     consistency between the shell prompt and the Claude status line.
+#   - Metadata (context %, lines) uses subdued colors — informational,
+#     not attention-grabbing.
+#   - Context % uses a heat-map gradient (green -> red as it fills).
+#   - Auth warning is silent on the "max" subscription. Any other state
+#     (different tier, API key, no auth) renders prominently. Claude
+#     Code can authenticate via OAuth (flat subscription) or API key
+#     (per-token billing); accidental API-key use can cost hundreds of
+#     dollars per session, so the warning makes the auth state visible.
 #
-# WHY CHECK AUTH?
-#   Claude Code can authenticate via OAuth (flat monthly subscription) or API key
-#   (per-token billing). Accidentally using API key can cost hundreds of dollars.
-#   The warning makes auth status visible at a glance.
-#
+# Install: symlinked from dotfiles/claude/statusline.sh by `make`.
 # =============================================================================
 
-set -o errexit
-set -o nounset
-set -o pipefail
 
 # =============================================================================
 # Colors
 # =============================================================================
 #
-# Three color categories:
-#   1. PS1 colors - match user's zsh prompt for visual consistency
-#   2. Metadata colors - subdued, informational (not attention-grabbing)
-#   3. Gradient colors - context % heat map (green=safe, red=nearly full)
+# ESC is pre-decoded once at script load (matches tint:61). All color
+# values are pre-decoded strings; output uses plain %s. This keeps user
+# data (paths, branch names) safe from accidental backslash interpretation.
 
-# PS1 colors (vibrant - user expects these from their shell prompt)
-BLUE="\033[0;34m"
-LIME="\033[38;5;154m"
-TURQUOISE="\033[38;5;45m"
-ORANGE="\033[38;5;166m"
-MAGENTA="\033[0;35m"
-PURPLE="\033[38;5;141m"
-BRIGHT_RED="\033[1;31m"
-BRIGHT_GREEN="\033[38;5;118m"
-CYAN="\033[0;36m"
-YELLOWISH="\033[38;5;220m"
+ESC=$(printf '\033')
 
-# Metadata colors (subdued - information, not alerts)
-DIM="\033[2m"
-ENDC="\033[0m"
-SUBTLE_GREEN="\033[38;5;108m"
-SUBTLE_RED="\033[38;5;131m"
+# PS1 (vibrant — mirror zsh prompt)
+BLUE="${ESC}[0;34m"
+LIME="${ESC}[38;5;154m"
+TURQUOISE="${ESC}[38;5;45m"
+ORANGE="${ESC}[38;5;166m"
+MAGENTA="${ESC}[0;35m"
+PURPLE="${ESC}[38;5;141m"
+BRIGHT_RED="${ESC}[1;31m"
+BRIGHT_GREEN="${ESC}[38;5;118m"
+CYAN="${ESC}[0;36m"
+YELLOWISH="${ESC}[38;5;220m"
 
-# Context gradient (visual heat map as context fills up)
-CTX_GREEN="\033[38;5;108m"        # 0-24%   - plenty of room
-CTX_YELLOW_GREEN="\033[38;5;149m" # 25-49%  - comfortable
-CTX_YELLOW="\033[38;5;179m"       # 50-64%  - getting warm
-CTX_ORANGE="\033[38;5;208m"       # 65-79%  - caution
-CTX_RED_ORANGE="\033[38;5;203m"   # 80-89%  - warning
-CTX_RED="\033[38;5;196m"          # 90-100% - critical
+# Subdued (informational metadata)
+ENDC="${ESC}[0m"
+SUBTLE_GREEN="${ESC}[38;5;108m"
+SUBTLE_RED="${ESC}[38;5;131m"
 
-# =============================================================================
-# Input Parsing
-# =============================================================================
+# Context gradient (heat map as the window fills)
+CTX_GREEN="${ESC}[38;5;108m"        # 0-24%   plenty of room
+CTX_YELLOW_GREEN="${ESC}[38;5;149m" # 25-49%  comfortable
+CTX_YELLOW="${ESC}[38;5;179m"       # 50-64%  getting warm
+CTX_ORANGE="${ESC}[38;5;208m"       # 65-79%  caution
+CTX_RED_ORANGE="${ESC}[38;5;203m"   # 80-89%  warning
+CTX_RED="${ESC}[38;5;196m"          # 90-100% critical
 
-# Read JSON input from Claude Code (passed via stdin)
-input=$(cat)
-
-# Extract fields using jq. The // operator provides defaults for missing fields.
-cwd=$(echo "$input" | jq -r '.workspace.current_dir')
-pct=$(echo "$input" | jq -r '.context_window.used_percentage // 0')
-cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0' | xargs printf "%.2f")
-lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
-lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
 
 # =============================================================================
-# Directory Display
+# Formatting Helpers
 # =============================================================================
+
+# format_dir <cwd> - Set $DIR_DISPLAY to colored directory matching zsh PS1
 #
-# Matches parse_homedir() from .zshrc for visual consistency with shell prompt.
-# Three cases:
-#   ~           - home directory (blue)
-#   ~/subdir    - under home (lime ~ + turquoise path)
-#   /elsewhere  - outside home (orange full path)
+# Three cases mirror parse_homedir() in .zshrc:
+#   ~          when cwd == $HOME       (blue)
+#   ~/<sub>    when cwd is under $HOME (lime ~ + turquoise subpath)
+#   <abs>      otherwise               (orange absolute)
+format_dir() {
+    case "$1" in
+        "$HOME")    DIR_DISPLAY="$BLUE~$ENDC" ;;
+        "$HOME"/*)  DIR_DISPLAY="$LIME~$ENDC$TURQUOISE${1#"$HOME"}$ENDC" ;;
+        *)          DIR_DISPLAY="$ORANGE$1$ENDC" ;;
+    esac
+}
 
-dir="$cwd"
-if [[ "$dir" == "$HOME" ]]; then
-    dir_display=$(printf '%b~%b' "$BLUE" "$ENDC")
-elif [[ "$dir" == "$HOME/"* ]]; then
-    subdir="${dir#$HOME}"
-    dir_display=$(printf '%b~%b%b%s%b' "$LIME" "$ENDC" "$TURQUOISE" "$subdir" "$ENDC")
-else
-    dir_display=$(printf '%b%s%b' "$ORANGE" "$dir" "$ENDC")
-fi
 
-# =============================================================================
-# Git Status
-# =============================================================================
+# format_git <cwd> - Set $GIT_DISPLAY to ' (branch) +N +N ~N' or empty
 #
-# Matches parse_git() and parse_git_changes() from .zshrc.
-#
-# Branch colors:
-#   - Detached HEAD (sha)  → bright red (unusual state, draw attention)
-#   - master               → magenta (primary branch)
-#   - other branches       → purple (feature work)
-#
-# Change indicators:
-#   - +N (green)  → staged files
-#   - +N (cyan)   → untracked files
-#   - ~N (yellow) → modified files
+# Empty when cwd is not in a git repo. Otherwise:
+#   - branch:    bright-red for detached HEAD, magenta for master, purple else
+#   - +N green:  staged files
+#   - +N cyan:   untracked files
+#   - ~N yellow: modified files (working tree)
+format_git() {
+    GIT_DISPLAY=""
+    command git -C "$1" rev-parse --git-dir >/dev/null 2>&1 || return
 
-git_info=""
-if git -C "$cwd" rev-parse --git-dir > /dev/null 2>&1; then
-    branch=$(git -C "$cwd" symbolic-ref --short HEAD 2>/dev/null)
-
+    local branch branch_str
+    branch=$(command git -C "$1" symbolic-ref --short HEAD 2>/dev/null)
     if [ -z "$branch" ]; then
-        git_sha=$(git -C "$cwd" rev-parse --short HEAD 2>/dev/null)
-        branch_display=$(printf '%b(%s)%b' "$BRIGHT_RED" "$git_sha" "$ENDC")
+        branch_str="$BRIGHT_RED($(command git -C "$1" rev-parse --short HEAD 2>/dev/null))$ENDC"
     elif [ "$branch" = "master" ]; then
-        branch_display=$(printf '%b(%s)%b' "$MAGENTA" "$branch" "$ENDC")
+        branch_str="$MAGENTA($branch)$ENDC"
     else
-        branch_display=$(printf '%b(%s)%b' "$PURPLE" "$branch" "$ENDC")
+        branch_str="$PURPLE($branch)$ENDC"
     fi
 
-    # Count changes (suppress errors for non-git directories)
-    num_added=$(git -C "$cwd" diff --cached --name-only 2>/dev/null | wc -l | tr -d ' ')
-    num_untracked=$(git -C "$cwd" ls-files --others --exclude-standard 2>/dev/null | wc -l | tr -d ' ')
-    num_modified=$(git -C "$cwd" diff --name-only 2>/dev/null | wc -l | tr -d ' ')
+    local num_staged num_untracked num_modified changes
+    num_staged=$(command git -C "$1" diff --cached --name-only 2>/dev/null | wc -l | tr -d ' ')
+    num_untracked=$(command git -C "$1" ls-files --others --exclude-standard 2>/dev/null | wc -l | tr -d ' ')
+    num_modified=$(command git -C "$1" diff --name-only 2>/dev/null | wc -l | tr -d ' ')
 
     changes=""
-    [ "$num_added" -gt 0 ] && changes=$(printf '%s%b+%s%b' "$changes" "$BRIGHT_GREEN" "$num_added" "$ENDC")
-    [ "$num_untracked" -gt 0 ] && changes=$(printf '%s%b+%s%b' "$changes" "$CYAN" "$num_untracked" "$ENDC")
-    [ "$num_modified" -gt 0 ] && changes=$(printf '%s%b~%s%b' "$changes" "$YELLOWISH" "$num_modified" "$ENDC")
+    [ "$num_staged" -gt 0 ]    && changes="$changes$BRIGHT_GREEN+$num_staged$ENDC"
+    [ "$num_untracked" -gt 0 ] && changes="$changes$CYAN+$num_untracked$ENDC"
+    [ "$num_modified" -gt 0 ]  && changes="$changes$YELLOWISH~$num_modified$ENDC"
 
-    git_info=$(printf ' %s%s' "$branch_display" "$changes")
-fi
+    GIT_DISPLAY=" $branch_str$changes"
+}
 
-# =============================================================================
-# Auth Warning
-# =============================================================================
+
+# pct_color <pct> - Set $PCT_COLOR escape based on context window percentage
 #
-# Claude Code supports two auth methods:
-#   1. OAuth (subscription) - flat monthly rate, no per-token cost
-#   2. API key - per-token billing, can get expensive fast
-#
-# The "max" subscription is the expected state for heavy users. Any other state
-# (different subscription tier, API key, or no auth) triggers a visible warning.
-# This prevents accidentally burning through API credits.
-#
-# Credential file location is hardcoded by Claude Code.
-
-creds_file="$HOME/.claude/.credentials.json"
-auth_warning=""
-
-if [ -f "$creds_file" ]; then
-    sub_type=$(jq -r '.claudeAiOauth.subscriptionType // empty' "$creds_file" 2>/dev/null)
-
-    if [ "$sub_type" = "max" ]; then
-        # Expected state - show nothing (silent when correct)
-        auth_warning=""
-    elif [ -n "$sub_type" ]; then
-        # Other subscription tier - might have usage limits
-        auth_warning=$(printf '%b⚠ %s $%s%b' "$YELLOWISH" "$sub_type" "$cost" "$ENDC")
-    elif jq -e '.apiKey' "$creds_file" >/dev/null 2>&1; then
-        # API key auth - per-token billing, show cost prominently
-        auth_warning=$(printf '%b⚠ API $%s%b' "$BRIGHT_RED" "$cost" "$ENDC")
-    else
-        auth_warning=$(printf '%b⚠ NO AUTH%b' "$BRIGHT_RED" "$ENDC")
+# Heat map: green for low usage, yellow/orange in the middle, red as we
+# approach context exhaustion.
+pct_color() {
+    if   [ "$1" -lt 25 ]; then PCT_COLOR="$CTX_GREEN"
+    elif [ "$1" -lt 50 ]; then PCT_COLOR="$CTX_YELLOW_GREEN"
+    elif [ "$1" -lt 65 ]; then PCT_COLOR="$CTX_YELLOW"
+    elif [ "$1" -lt 80 ]; then PCT_COLOR="$CTX_ORANGE"
+    elif [ "$1" -lt 90 ]; then PCT_COLOR="$CTX_RED_ORANGE"
+    else                       PCT_COLOR="$CTX_RED"
     fi
-else
-    auth_warning=$(printf '%b⚠ NO AUTH%b' "$BRIGHT_RED" "$ENDC")
-fi
+}
+
+
+# format_auth_warning <cost> - Set $AUTH_WARNING to colored warning or empty
+#
+# Empty on the "max" subscription (silent when correct). Otherwise renders
+# the auth state with the session cost. See the Design section above.
+format_auth_warning() {
+    local cost="$1"
+    local creds="$HOME/.claude/.credentials.json"
+    local sub_type
+
+    if [ ! -f "$creds" ]; then
+        AUTH_WARNING="$BRIGHT_RED⚠ NO AUTH$ENDC"
+        return
+    fi
+
+    sub_type=$(command jq -r '.claudeAiOauth.subscriptionType // empty' "$creds" 2>/dev/null)
+    if [ "$sub_type" = "max" ]; then
+        AUTH_WARNING=""
+    elif [ -n "$sub_type" ]; then
+        AUTH_WARNING="$YELLOWISH⚠ $sub_type \$$cost$ENDC"
+    elif command jq -e '.apiKey' "$creds" >/dev/null 2>&1; then
+        AUTH_WARNING="$BRIGHT_RED⚠ API \$$cost$ENDC"
+    else
+        AUTH_WARNING="$BRIGHT_RED⚠ NO AUTH$ENDC"
+    fi
+}
+
 
 # =============================================================================
-# Context Percentage (Gradient)
+# Main
 # =============================================================================
-#
-# Visual heat map for context window usage. Color transitions:
-#   Green (0-24%)     → plenty of room, no concern
-#   Yellow (25-64%)   → normal usage, mild awareness
-#   Orange (65-79%)   → getting full, consider wrapping up
-#   Red (80-100%)     → nearly full, compaction imminent
-#
-# The gradient provides ambient awareness without requiring conscious monitoring.
 
-if [ "$pct" -lt 25 ]; then
-    pct_color="$CTX_GREEN"
-elif [ "$pct" -lt 50 ]; then
-    pct_color="$CTX_YELLOW_GREEN"
-elif [ "$pct" -lt 65 ]; then
-    pct_color="$CTX_YELLOW"
-elif [ "$pct" -lt 80 ]; then
-    pct_color="$CTX_ORANGE"
-elif [ "$pct" -lt 90 ]; then
-    pct_color="$CTX_RED_ORANGE"
-else
-    pct_color="$CTX_RED"
-fi
+# main - Read JSON session context from stdin, print one status line
+main() {
+    local input parsed cwd pct cost lines_added lines_removed
+    input=$(cat)
 
-# =============================================================================
-# Output
-# =============================================================================
-#
-# Format: DIR GIT  CONTEXT%  +ADDED -REMOVED  [WARNING]
-#
-# The auth warning only appears when something needs attention. This follows
-# the principle of "silent when correct, loud when wrong."
+    # One jq invocation, five fields. Each on its own line, read in order.
+    parsed=$(printf '%s' "$input" | command jq -r '
+        .workspace.current_dir,
+        .context_window.used_percentage // 0,
+        .cost.total_cost_usd // 0,
+        .cost.total_lines_added // 0,
+        .cost.total_lines_removed // 0
+    ') || return 1
 
-printf '%s%s  %b%s%%%b  %b+%s%b %b-%s%b%s' \
-    "$dir_display" "$git_info" \
-    "$pct_color" "$pct" "$ENDC" \
-    "$SUBTLE_GREEN" "$lines_added" "$ENDC" \
-    "$SUBTLE_RED" "$lines_removed" "$ENDC" \
-    "${auth_warning:+  $auth_warning}"
+    {
+        IFS= read -r cwd
+        IFS= read -r pct
+        IFS= read -r cost
+        IFS= read -r lines_added
+        IFS= read -r lines_removed
+    } <<EOF
+$parsed
+EOF
+
+    cost=$(printf '%.2f' "$cost")
+
+    format_dir "$cwd"
+    format_git "$cwd"
+    pct_color "$pct"
+    format_auth_warning "$cost"
+
+    printf '%s%s  %s%s%%%s  %s+%s%s %s-%s%s%s' \
+        "$DIR_DISPLAY" "$GIT_DISPLAY" \
+        "$PCT_COLOR" "$pct" "$ENDC" \
+        "$SUBTLE_GREEN" "$lines_added" "$ENDC" \
+        "$SUBTLE_RED" "$lines_removed" "$ENDC" \
+        "${AUTH_WARNING:+  $AUTH_WARNING}"
+}
+
+main
