@@ -1,22 +1,45 @@
 #!/bin/bash
-###############################################################################
-# Claude Code Environment Setup
-###############################################################################
+# =============================================================================
+# claude-env.sh - Claude Code per-command environment setup
+# =============================================================================
 #
-# This file is sourced by Claude Code before each Bash command.
-# Symlinked to ~/.claude-env.sh by dotfiles install.py
-# Activated via CLAUDE_ENV_FILE in ~/.zshenv
+# Sourced by Claude Code before every Bash tool invocation. Activated via
+# CLAUDE_ENV_FILE=~/.claude-env.sh (set in ~/.zshenv).
 #
-# Keep this file fast - it runs before EVERY command.
+# This file must be FAST — it runs before EVERY command. Avoid forks, file
+# I/O, and slow shell init (e.g., do not source ~/.bashrc, do not run
+# nvm.sh). Resolve PATH manually instead.
 #
-###############################################################################
+# Behavior:
+#   1. Loads project-specific environment via direnv
+#   2. Mirrors ~/.zshenv PATH setup (bash subprocesses don't read .zshenv)
+#   3. Forces non-interactive editors/pagers so tools don't hang on $EDITOR
+#
+# Install: symlinked from dotfiles/claude/claude-env.sh by `make`.
+# =============================================================================
 
-# Load direnv for project-specific environment variables (CARGO_HOME, etc.)
+
+# =============================================================================
+# direnv
+# =============================================================================
+#
+# Loads project-specific overrides (CARGO_HOME, GOPATH, etc.) from .envrc.
+# Silenced because direnv prints a banner that would pollute tool output.
+
 if command -v direnv >/dev/null 2>&1; then
     eval "$(direnv export bash 2>/dev/null)"
 fi
 
-# nvm — add default node to PATH (mirrors .zshenv setup for bash)
+
+# =============================================================================
+# PATH (mirrors ~/.zshenv)
+# =============================================================================
+#
+# Bash subprocesses don't source .zshenv (zsh-only). Replicate the parts
+# that matter for command resolution: node, go, rust, bun, ~/.local/bin.
+
+# nvm — add default node to PATH without sourcing nvm.sh (~300ms).
+# Resolves alias chain (default → node|lts/* → versioned dir).
 export NVM_DIR="$HOME/.nvm"
 if [[ -d "$NVM_DIR/versions/node" ]]; then
     _nvm_ver=$(<"$NVM_DIR/alias/default" 2>/dev/null)
@@ -36,7 +59,7 @@ if [[ -d /usr/local/go ]]; then
     export GOPATH="$HOME/go"
 fi
 
-# rust
+# rust (cargo + rustup)
 [[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
 
 # bun
@@ -47,13 +70,19 @@ fi
 
 export PATH
 
-# Non-interactive editors and pagers
+
+# =============================================================================
+# Non-interactive defaults
+# =============================================================================
+#
+# Force editors/pagers to `cat` so tools that try to spawn $EDITOR or $PAGER
+# don't hang in the background waiting for input that will never come.
+
 export EDITOR=cat
 export VISUAL=cat
 export PAGER=cat
 export GIT_PAGER=cat
 export LESS="-R --quit-if-one-screen --no-init"
 
-# Non-interactive operation
 export DEBIAN_FRONTEND=noninteractive
 export PYTHONUNBUFFERED=1
