@@ -17,3 +17,7 @@ vim/.netrwhist
 
 # Claude Code local settings
 .claude/
+
+# Test fixture for local Makefile testing
+.tmp-home*/
+.tmp-old*/

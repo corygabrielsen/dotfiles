@@ -1,77 +1,38 @@
-# The ~/.zprofile file is a configuration file for the Z shell (zsh) that is
-# sourced (executed) when you log in to the system. It is used to define
-# settings, aliases, and functions that should be set when you log in to the
-# system.
+# shellcheck shell=sh
+# =============================================================================
+# .zprofile - Re-source ~/.profile after macOS path_helper demotion
+# =============================================================================
 #
-# This file should not contain commands, options, or keybindings that produce
-# output or modify the shell. It is intended to be used to set environment
-# variables, aliases, functions, and commands. Options and keybindings should
-# be set in the ~/.zshrc file.
+# zsh sources files in this order on login shells:
+#   /etc/zshenv → ~/.zshenv → /etc/zprofile → ~/.zprofile → ...
 #
-# To use the ~/.zprofile file, you can create a symlink to the file in your
-# home directory using the ln command:
+# ~/.zshenv has already sourced ~/.profile, so on Linux this file would
+# only repeat the work for no benefit (the dedup at the end of ~/.profile
+# keeps PATH stable but the profile.d/* drop-ins still re-fork external
+# tools, source ~/.local/bin/env again, etc.).
 #
-#   ln -s path/to/dotfiles/zsh/zprofile ~/.zprofile
+# On macOS, /etc/zprofile runs `path_helper` between ~/.zshenv and this
+# file, which rebuilds PATH from /etc/paths and /etc/paths.d/* — putting
+# system paths at the front and demoting every PATH prepend our profile
+# made (Homebrew, nvm, pyenv shims). Re-sourcing ~/.profile here re-
+# prepends the toolchain dirs over path_helper's output, and the dedup
+# at the end of ~/.profile keeps the fresh (front) copies and drops the
+# demoted duplicates.
 #
+# Symlinked to ~/.zprofile by `make`.
+# =============================================================================
 
-
-
-################################################################################
-# Environment
-################################################################################
-export HOSTNAME=$(uname -n)
-
-################################################################################
-# Homebrew
-################################################################################
-#
-# Homebrew is a package manager for macOS and Linux.
-# This section initializes Homebrew if it's installed.
-#
-# On macOS, Homebrew is typically installed in /opt/homebrew (Apple Silicon)
-# or /usr/local (Intel). On Linux, it's typically in /home/linuxbrew/.linuxbrew
-# or ~/.linuxbrew.
-#
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS - check both possible Homebrew locations
-    if [[ -x "/opt/homebrew/bin/brew" ]]; then
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-    elif [[ -x "/usr/local/bin/brew" ]]; then
-        eval "$(/usr/local/bin/brew shellenv)"
-    fi
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    # Linux - check both possible Homebrew locations
-    if [[ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
-        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-    elif [[ -x "$HOME/.linuxbrew/bin/brew" ]]; then
-        eval "$($HOME/.linuxbrew/bin/brew shellenv)"
-    fi
+if [ "$(command uname)" = "Darwin" ]; then
+    # Re-source ~/.profile to re-prepend toolchain dirs over path_helper's
+    # demoted PATH. profile.d/99-local.sh keeps its `_PROFILE_LOCAL_LOADED`
+    # guard set, so the user hook in ~/.profile.local does NOT run again
+    # — that file is for one-shot setup and re-running would duplicate
+    # side effects (agent launches, log writes, etc.).
+    #
+    # Caveat: any PATH prepends in ~/.profile.local stay demoted by
+    # path_helper here, since the user hook isn't re-run. Put per-shell
+    # PATH adjustments in ~/.zshrc.local (runs post-path_helper, in
+    # interactive zsh) or in a new profile.d/ drop-in instead.
+    # shellcheck disable=SC1091  # symlinked at install time
+    . "$HOME/.profile"
 fi
-
-################################################################################
-# pyenv
-################################################################################
-#
-# This is the recommended way to set up Pyenv in your shell.
-#
-# bash
-# https://github.com/pyenv/pyenv/issues/1906#issuecomment-835027647
-#
-# zsh
-# https://github.com/pyenv/pyenv/issues/1906#issuecomment-839556656
-#
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-if command -v pyenv 1>/dev/null 2>&1; then
-  eval "$(pyenv init --path)"
-fi
-
-################################################################################
-# User-local binaries
-################################################################################
-[[ -d "$HOME/.local/bin" ]] && export PATH="$HOME/.local/bin:$PATH"
-
-################################################################################
-# Lean (elan)
-################################################################################
-[[ -d "$HOME/.elan/bin" ]] && export PATH="$HOME/.elan/bin:$PATH"

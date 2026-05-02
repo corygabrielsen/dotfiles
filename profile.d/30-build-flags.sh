@@ -8,9 +8,9 @@
 # =============================================================================
 
 if command -v nproc >/dev/null 2>&1; then
-    MAKEFLAGS="-j$(nproc)"
-elif [ "$(uname)" = "Darwin" ]; then
-    MAKEFLAGS="-j$(sysctl -n hw.ncpu)"
+    MAKEFLAGS="-j$(command nproc)"
+elif [ "$(command uname)" = "Darwin" ]; then
+    MAKEFLAGS="-j$(command sysctl -n hw.ncpu)"
 fi
 
 [ -n "${MAKEFLAGS:-}" ] && export MAKEFLAGS

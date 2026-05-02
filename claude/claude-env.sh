@@ -6,78 +6,65 @@
 # Sourced by Claude Code before every Bash tool invocation. Activated via
 # CLAUDE_ENV_FILE=~/.claude-env.sh (set in ~/.zshenv).
 #
-# This file must be FAST — it runs before EVERY command. Avoid forks, file
-# I/O, and slow shell init (e.g., do not source ~/.bashrc, do not run
-# nvm.sh). Resolve PATH manually instead.
+# Must be FAST — runs before EVERY command. Avoid forks, slow init.
 #
 # Behavior:
-#   1. Loads project-specific environment via direnv
-#   2. Mirrors ~/.zshenv PATH setup (bash subprocesses don't read .zshenv)
-#   3. Forces non-interactive editors/pagers so tools don't hang on $EDITOR
+#   1. Source ~/.profile (profile.d/* — toolchain PATH, locale, etc.)
+#      so Claude Bash works regardless of how Claude Code was launched
+#      (login terminal, editor terminal, GUI launcher).
+#   2. Run direnv AFTER .profile so any .envrc PATH prepends (e.g.,
+#      virtualenv `.venv/bin` from `layout python`) end up at the
+#      front of PATH, ahead of the toolchain dirs profile.d added.
+#   3. Force non-interactive editors/pagers so tools don't hang.
 #
-# Install: symlinked from dotfiles/claude/claude-env.sh by `make`.
-# =============================================================================
-
-
-# =============================================================================
-# direnv
-# =============================================================================
+# `_PROFILE_LOCAL_LOADED` (exported by profile.d/99-local.sh on first
+# source) keeps ~/.profile.local from replaying side effects for every
+# Claude command — the user hook runs once per terminal session and
+# child Bash invocations skip it.
 #
-# Loads project-specific overrides (CARGO_HOME, GOPATH, etc.) from .envrc.
-# Silenced because direnv prints a banner that would pollute tool output.
+# Symlinked to ~/.claude-env.sh by `make`.
+# =============================================================================
 
+# Shared POSIX env (PATH, toolchains, locale, build flags).
+# shellcheck disable=SC1091  # symlinked at install time
+. "$HOME/.profile"
+
+# direnv: load (or unload) project-specific env. Always called — direnv
+# is responsible for both the export side (loading new state when
+# entering an .envrc tree) AND the unload side (clearing previous state
+# when leaving). Skipping when no .envrc exists below $PWD would leak
+# last-project state into commands run elsewhere.
 if command -v direnv >/dev/null 2>&1; then
     eval "$(direnv export bash 2>/dev/null)"
 fi
 
-
-# =============================================================================
-# PATH (mirrors ~/.zshenv)
-# =============================================================================
+# Restore an active Python environment (virtualenv or conda) to the
+# front of PATH. If the parent shell has one activated, profile.d/20-
+# python.sh's pyenv-shim prepend would otherwise put pyenv ahead of the
+# environment's `python`. The dedup at the end of ~/.profile keeps both
+# copies but in the wrong order. This explicit re-prepend brings the
+# environment back to position 1 — direnv export tracks only its own
+# state changes, not order, so it can't fix this on its own.
 #
-# Bash subprocesses don't source .zshenv (zsh-only). Replicate the parts
-# that matter for command resolution: node, go, rust, bun, ~/.local/bin.
-
-# nvm — add default node to PATH without sourcing nvm.sh (~300ms).
-# Resolves alias chain (default → node|lts/* → versioned dir).
-export NVM_DIR="$HOME/.nvm"
-if [[ -d "$NVM_DIR/versions/node" ]]; then
-    _nvm_ver=$(<"$NVM_DIR/alias/default" 2>/dev/null)
-    if [[ "$_nvm_ver" == "node" || -z "$_nvm_ver" ]]; then
-        # "node" alias = latest installed; pick highest version
-        _nvm_node_bin=$(ls -d "$NVM_DIR"/versions/node/v*/bin 2>/dev/null | sort -V | tail -1)
-    else
-        _nvm_node_bin=$(ls -d "$NVM_DIR"/versions/node/v${_nvm_ver}*/bin 2>/dev/null | sort -V | tail -1)
-    fi
-    [[ -n "$_nvm_node_bin" ]] && PATH="$_nvm_node_bin:$PATH"
-    unset _nvm_ver _nvm_node_bin
+# Order: CONDA_PREFIX first, VIRTUAL_ENV last. The common case is a
+# venv created inside a conda env — both vars are set, but the user
+# wants the venv's python (it's the explicitly-activated inner env).
+# Checking VIRTUAL_ENV last lands it at PATH position 1 in that case.
+if [ -n "${CONDA_PREFIX:-}" ] && [ -d "$CONDA_PREFIX/bin" ]; then
+    case ":$PATH:" in
+        ":$CONDA_PREFIX/bin:"*) ;;
+        *) PATH="$CONDA_PREFIX/bin:$PATH" ;;
+    esac
+fi
+if [ -n "${VIRTUAL_ENV:-}" ] && [ -d "$VIRTUAL_ENV/bin" ]; then
+    case ":$PATH:" in
+        ":$VIRTUAL_ENV/bin:"*) ;;
+        *) PATH="$VIRTUAL_ENV/bin:$PATH" ;;
+    esac
 fi
 
-# go
-if [[ -d /usr/local/go ]]; then
-    PATH="/usr/local/go/bin:$PATH"
-    export GOPATH="$HOME/go"
-fi
-
-# rust (cargo + rustup)
-[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
-
-# bun
-[[ -d "$HOME/.bun/bin" ]] && PATH="$HOME/.bun/bin:$PATH"
-
-# user binaries
-[[ -d "$HOME/.local/bin" ]] && PATH="$HOME/.local/bin:$PATH"
-
-export PATH
-
-
-# =============================================================================
-# Non-interactive defaults
-# =============================================================================
-#
-# Force editors/pagers to `cat` so tools that try to spawn $EDITOR or $PAGER
-# don't hang in the background waiting for input that will never come.
-
+# Non-interactive editors and pagers — prevent tools from spawning
+# $EDITOR or $PAGER and hanging on input that will never arrive.
 export EDITOR=cat
 export VISUAL=cat
 export PAGER=cat

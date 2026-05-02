@@ -1,136 +1,76 @@
-# The ~/.zshenv file is a configuration file for the Z shell (zsh) that is
-# sourced (executed) for all invocations of the shell — login, interactive,
-# non-interactive, and scripts. Put environment variables and PATH setup here
-# so that subprocesses (git hooks, CI, pre-commit, editors) can find tools.
+# shellcheck shell=sh
+# =============================================================================
+# .zshenv - zsh env, sourced by every zsh invocation
+# =============================================================================
 #
-# Do NOT put anything that produces output, modifies terminal state, or is
-# only relevant to interactive use. Those belong in ~/.zshrc.
+# Sources ~/.profile (which loops ~/.profile.d/*.sh and sets up PATH,
+# toolchains, locale, build flags) so EVERY zsh — login, interactive,
+# `zsh -c` from CI/git-hook/editor-subprocess, anything that runs zsh —
+# starts with the user's full toolchain PATH. Editor terminals (Cursor,
+# VSCode, JetBrains) often spawn non-login zsh by default; without
+# .zshenv sourcing here they would inherit only the system PATH and
+# Claude's Bash subprocesses launched from those terminals would lose
+# `node`, `bun`, `cargo`, `pyenv`, etc.
 #
-#   ln -s path/to/dotfiles/zsh/zshenv ~/.zshenv
+# In nested zsh, profile.d/* re-runs and re-prepends toolchain dirs.
+# That can demote a parent's runtime PATH overlay (active virtualenv,
+# direnv-set venv) — same behavior as the pre-refactor .zshenv. The
+# dedup at the end of ~/.profile prevents PATH growth.
 #
+# 99-local.sh's `_PROFILE_LOCAL_LOADED` exported guard keeps user hooks
+# in ~/.profile.local from replaying for every Claude Bash subprocess —
+# they fire once per terminal session.
+#
+# Symlinked to ~/.zshenv by `make`.
+# =============================================================================
 
-# Source local environment variables if the file exists
-[[ -f ~/.zshenv.local ]] && source ~/.zshenv.local
+# Transitional — content should migrate to ~/.profile.local (env vars)
+# or ~/.zshrc.local (interactive aliases). Drop this line once empty.
+# shellcheck disable=SC1091  # per-machine, not part of repo
+[ -f "$HOME/.zshenv.local" ] && . "$HOME/.zshenv.local"
 
-# Claude Code environment file
-# This tells Claude Code to source ~/.claude-env.sh before each command
-export CLAUDE_ENV_FILE=~/.claude-env.sh
+# Shared POSIX env (PATH, toolchains, locale, build flags, DISPLAY).
+# shellcheck disable=SC1091  # symlinked at install time
+. "$HOME/.profile"
 
-# Disable Claude Code's terminal flicker-on-redraw
+# GPG_TTY is also set by profile.d/00-locale.sh, but refresh defensively
+# in case .profile sourcing was suppressed somehow. Inherited GPG_TTY
+# is left alone when `tty` fails — the parent's value usually still
+# points at a live terminal that can serve pinentry.
+if _tty=$(command tty 2>/dev/null); then
+    export GPG_TTY="$_tty"
+fi
+unset _tty
+
+# Full pyenv shell integration: defines the `pyenv` shell function and
+# completions on top of the shims that profile.d/20-python.sh put on
+# PATH. Lives in .zshenv (not .zshrc) so non-interactive zsh —
+# `zsh -c '...'` from CI, git hooks, editor subprocesses — still gets
+# the function. Without it, scripts that call `pyenv shell <ver>` or
+# `pyenv activate` silently fall back to running the binary, which
+# can't change shell state. `--no-rehash` skips the ~50ms refresh —
+# rehash already ran in profile.d/20-python.sh's `pyenv init --path sh`.
+# `pyenv init -` dedupes shims internally, so re-running in nested zsh
+# doesn't grow PATH.
+if command -v pyenv >/dev/null 2>&1; then
+    eval "$(command pyenv init - --no-rehash zsh)"
+fi
+
+# Homebrew zsh completions: profile.d/10-homebrew.sh caches `brew
+# shellenv sh` (POSIX form), which omits the zsh fpath entry. Add it
+# here in .zshenv (NOT .zshrc) because some systems run compinit from
+# /etc/zsh/zshrc, which fires before user .zshrc — by then a zshrc-level
+# fpath addition is too late. Idempotent so nested zsh sessions don't
+# accumulate duplicate fpath entries.
+if [ -n "${HOMEBREW_PREFIX:-}" ] && [ -d "$HOMEBREW_PREFIX/share/zsh/site-functions" ]; then
+    case " ${fpath[*]} " in
+        *" $HOMEBREW_PREFIX/share/zsh/site-functions "*) ;;
+        *) fpath=("$HOMEBREW_PREFIX/share/zsh/site-functions" $fpath) ;;
+    esac
+fi
+
+# Claude Code: source ~/.claude-env.sh before every Bash tool invocation.
+export CLAUDE_ENV_FILE="$HOME/.claude-env.sh"
+
+# Suppress Claude Code's terminal flicker-on-redraw.
 export CLAUDE_CODE_NO_FLICKER=1
-
-
-
-###############################################################################
-# Environment Variables
-###############################################################################
-
-export LANG=en_US.UTF-8
-export GPG_TTY=$(tty)
-
-# Build tools - use all available cores for parallel compilation
-if command -v nproc >/dev/null 2>&1; then
-    export MAKEFLAGS="-j$(nproc)"
-elif [[ "${OSTYPE}" == "darwin"* ]]; then
-    export MAKEFLAGS="-j$(sysctl -n hw.ncpu)"
-fi
-
-
-
-###############################################################################
-# X Server
-###############################################################################
-
-if [[ "${OSTYPE}" == "darwin"* ]]; then
-    export DISPLAY=$(ipconfig getifaddr en0):0
-fi
-
-
-
-###############################################################################
-# Homebrew (Linuxbrew)
-###############################################################################
-
-if [[ -d /home/linuxbrew/.linuxbrew ]]; then
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
-fi
-
-
-
-###############################################################################
-# nvm
-###############################################################################
-
-export NVM_DIR="$HOME/.nvm"
-
-# Add default node to PATH without sourcing slow nvm.sh (~300ms).
-# Full nvm is loaded in .zshrc for interactive `nvm use`/`nvm install`.
-# Resolves alias chain (default -> node -> latest) to find the bin directory.
-if [[ -d "$NVM_DIR/versions/node" ]]; then
-    _nvm_ver=$(<"$NVM_DIR/alias/default" 2>/dev/null)
-    # Resolve alias chain: "node" or "lts/*" -> pick latest installed
-    if [[ "$_nvm_ver" == "node" || -z "$_nvm_ver" ]]; then
-        _nvm_bins=("$NVM_DIR"/versions/node/v*/bin(NnOn))
-    else
-        _nvm_bins=("$NVM_DIR"/versions/node/v${_nvm_ver}*/bin(NnOn))
-    fi
-    (( ${#_nvm_bins} )) && export PATH="${_nvm_bins[1]}:$PATH"
-    unset _nvm_ver _nvm_bins
-fi
-
-
-
-###############################################################################
-# bun
-###############################################################################
-
-export BUN_INSTALL="$HOME/.bun"
-[[ -d "$BUN_INSTALL/bin" ]] && export PATH="$BUN_INSTALL/bin:$PATH"
-
-
-
-###############################################################################
-# go
-###############################################################################
-
-if [[ -d /usr/local/go ]]; then
-    export PATH="${PATH}:/usr/local/go/bin"
-    export GOPATH="${HOME}/go"
-fi
-
-
-
-###############################################################################
-# rust
-###############################################################################
-
-[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
-
-for _foundry_path in "$HOME/.foundry/bin" "/usr/local/foundry/bin"; do
-    if [[ -d "$_foundry_path" ]]; then
-        export PATH="$PATH:$_foundry_path"
-        break
-    fi
-done
-unset _foundry_path
-
-
-
-###############################################################################
-# pyenv
-###############################################################################
-
-if command -v pyenv 1>/dev/null 2>&1; then
-    eval "$(pyenv init -)"
-fi
-
-
-
-###############################################################################
-# User-specific binaries
-###############################################################################
-
-[[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
-
-# opencode
-[[ -d "$HOME/.opencode/bin" ]] && export PATH="$HOME/.opencode/bin:$PATH"

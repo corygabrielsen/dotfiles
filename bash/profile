@@ -1,6 +1,6 @@
 # shellcheck shell=sh
 # =============================================================================
-# .profile - Canonical login env, sourced by every shell and every script
+# .profile - Canonical login env, sourced by every login shell
 # =============================================================================
 #
 # No shebang: this file is never executed, only sourced. Industry
@@ -9,22 +9,25 @@
 # `# shellcheck shell=sh` directive above tells shellcheck which dialect
 # to lint against, replacing the shebang's editor-hint role.
 #
-# This file is the single source of truth for shell-agnostic environment.
-# It loops through ~/.profile.d/*.sh and sources each in lexical order
-# (00-, 10-, 20-, etc.). Each drop-in owns one concern (locale, PATH,
-# toolchain). Adding a new tool tomorrow is a new file, not an edit here.
+# Single source of truth for shell-agnostic environment. Loops through
+# ~/.profile.d/*.sh and sources each in lexical order (00-, 10-, 20-,
+# etc.). Each drop-in owns one concern (locale, PATH, toolchain). Adding
+# a new tool tomorrow is a new file, not an edit here.
 #
-# Mirrors the /etc/profile.d/ pattern used across Linux distributions, sudo,
-# cron, systemd, apt, and many others — drop-in directories compose without
-# conflict.
+# Mirrors the /etc/profile.d/ pattern used across Linux distributions,
+# sudo, cron, systemd, apt, and many others — drop-in directories compose
+# without conflict.
 #
 # Activation:
-#   - Bash auto-sources this file as ~/.profile for login shells (POSIX
-#     standard fallback when ~/.bash_profile and ~/.bash_login are absent).
-#   - Other shells source it explicitly with `. ~/.profile` once they're
-#     wired up to do so. Today nothing else sources it; future commits
-#     will slim ~/.zshenv and ~/.claude-env.sh down to a single
-#     `. ~/.profile` plus shell-specific overrides.
+#   - bash login auto-sources this as ~/.profile (POSIX fallback when
+#     ~/.bash_profile and ~/.bash_login are absent).
+#   - zsh login sources it via ~/.zprofile (which handles macOS path_helper
+#     recovery as a side effect).
+#   - Non-login shells (zsh subshells, claude-env.sh, scripts) inherit
+#     PATH from their parent and do NOT re-source this file. That's
+#     intentional: re-prepending toolchain dirs in every shell would
+#     demote runtime overlays (active virtualenv, direnv export, manual
+#     `PATH=foo:$PATH`) the parent shell deliberately put first.
 #
 # Style:
 #   POSIX-only. The contents of ~/.profile.d/*.sh must parse under dash. Use
@@ -33,19 +36,49 @@
 # Symlinked to ~/.profile by `make` from dotfiles/bash/profile.
 # =============================================================================
 
-#
 # Iteration uses `ls` + word-splitting (rather than a shell glob) because
-# zsh's default NOMATCH behavior treats an unmatched glob as a fatal error,
-# which would break this file when sourced from .zshenv before profile.d/
-# has any files. `ls` always succeeds (or fails benignly into an empty
-# command sub when the dir is missing), so the loop is correct on bash,
-# dash, ash, and zsh alike.
+# zsh's default NOMATCH behavior treats an unmatched glob as a fatal
+# error, which would break this file under zsh when ~/.profile.d/ is
+# missing. `ls` always succeeds (or fails benignly into an empty command
+# sub), so the loop is correct on bash, dash, ash, and zsh alike.
 if [ -d "$HOME/.profile.d" ]; then
     # shellcheck disable=SC2045  # ls iteration is the zsh-safe choice; see comment above
-    for f in $(LC_ALL=C ls "$HOME/.profile.d" 2>/dev/null); do
+    for f in $(LC_ALL=C command ls "$HOME/.profile.d" 2>/dev/null); do
         case "$f" in *.sh) ;; *) continue ;; esac
         # shellcheck disable=SC1090  # dynamic source path is the whole point
         . "$HOME/.profile.d/$f"
     done
     unset f
 fi
+
+# Dedupe colon-paths, first occurrence wins (order preserved). The two
+# scenarios that need this:
+#   1. macOS ~/.zprofile flow: /etc/zprofile's path_helper demoted our
+#      entries to later in PATH, then this file's loop re-prepended them
+#      to the front. Dedup keeps the fresh (front) copies and drops the
+#      demoted duplicates.
+#   2. Manual re-source within a shell (rare, but cheap to handle).
+#
+# First-wins (not last-wins) is the right semantic: every PATH override
+# (a fresh `PATH="dir:$PATH"`) lands at position 1, so the first sighting
+# of any directory reflects the user's most recent intent.
+#
+# MANPATH/INFOPATH get the same dedup. A trailing `:` (sentinel meaning
+# "append the system default search path", e.g. `MANPATH=/foo:` adds
+# /usr/share/man, /opt/...) is preserved — POSIX awk drops the empty
+# record after the final `:`, so the sed strips the only trailing colon
+# and we reattach it when the input had one.
+#
+# Subshell function `()` so locals don't leak. `command` prefix defeats
+# interactive aliases on re-source.
+_dedup_colons() (
+    _v=$(printf '%s' "$1" | command awk -v RS=: -v ORS=: '!seen[$0]++' | command sed 's/:$//')
+    case "$1" in *:) _v="$_v:" ;; esac
+    printf '%s' "$_v"
+)
+
+PATH=$(_dedup_colons "$PATH")
+export PATH
+[ -n "${MANPATH:-}" ]  && MANPATH=$(_dedup_colons "$MANPATH")   && export MANPATH
+[ -n "${INFOPATH:-}" ] && INFOPATH=$(_dedup_colons "$INFOPATH") && export INFOPATH
+unset -f _dedup_colons
