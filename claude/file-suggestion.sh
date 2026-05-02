@@ -1,81 +1,67 @@
-#!/bin/bash
+#!/bin/sh
 # =============================================================================
-# Polyrepo-Aware File Suggestion for Claude Code
+# file-suggestion.sh - Polyrepo-aware file suggestions for Claude Code
 # =============================================================================
 #
-# PROBLEM
-#   Polyrepo workspaces clone repos as gitignored subdirectories. Claude Code's
-#   default @ autocomplete respects .gitignore, making subrepos invisible to
-#   file suggestions. You type @README and only see the workspace README, not
-#   the README in each cloned subrepo.
+# Compatibility:
+#   POSIX shell (sh, dash, ash, bash). Uses `local` — de facto standard in
+#   modern shells; planned for the next POSIX revision. Requires git, jq,
+#   awk, sed, sort, cut, head.
 #
-# SOLUTION
-#   1. Find workspace root by walking up looking for a marker file
-#   2. Collect files from workspace AND all subrepo git indexes (in parallel)
-#   3. Transform paths to be relative to current working directory
-#   4. Prioritize: local files first, then siblings sorted by depth
-#
-# CONFIGURATION
+# Configuration:
 #   ~/.claude/settings.json:
-#   {
 #     "fileSuggestion": {
 #       "type": "command",
 #       "command": "~/.claude/file-suggestion.sh"
 #     }
-#   }
 #
-#   Optional: ~/.claude/file-suggestion.local.sh for work-specific overrides:
+#   Optional ~/.claude/file-suggestion.local.sh for per-machine overrides:
 #     export CLAUDE_WORKSPACE_MARKER="my-marker.json"
 #
-# PROTOCOL
-#   Input:  JSON on stdin with "query" field, e.g., {"query": "README"}
-#   Output: Newline-separated file paths on stdout (max 20)
+# Protocol:
+#   Stdin:  JSON with a "query" field, e.g., {"query": "README"}
+#   Stdout: Newline-separated file paths (up to 20)
 #
-# EXAMPLE
-#   Input:  {"query": "README"}
-#   Output:
-#     README.md
-#     ../protocol/README.md
-#     ../explorer/README.md
+# Problem:
+#   Polyrepo workspaces clone repos as gitignored subdirectories. Claude
+#   Code's default @ autocomplete respects .gitignore, making subrepos
+#   invisible. You type @README and only see the workspace README, not
+#   the README in each cloned subrepo.
 #
-# DESIGN DECISIONS
+# Solution:
+#   1. Walk up looking for a marker file to find the workspace root.
+#   2. Collect tracked + visible-untracked files from the workspace and
+#      from every gitignored sibling repo (in parallel).
+#   3. Rewrite paths to be relative to the current working directory.
+#   4. Filter by query and prioritize: local files first, then siblings
+#      sorted by depth, then alphabetical.
 #
-#   Why walk up for a marker file?
-#     The marker identifies the workspace root. Without it, we'd only search
-#     the current git repo, missing sibling subrepos. The marker is configurable
-#     so different projects can use different conventions.
+# Example:
+#   $ printf '{"query":"README"}' | file-suggestion.sh
+#   README.md
+#   ../protocol/README.md
+#   ../explorer/README.md
 #
-#   Why parallel subrepo queries?
-#     Large workspaces may have 10+ subrepos. Sequential git ls-files calls
-#     would add noticeable latency. Backgrounding each query and waiting for
-#     all to complete keeps autocomplete responsive.
+# Design notes:
+#   - Walk up for a marker?    Identifies the workspace root so we can reach
+#                              sibling repos. Configurable via env var.
+#   - Why parallel?            Workspaces may have 10+ subrepos; sequential
+#                              git ls-files would add visible latency.
+#   - Why local-first?         In protocol/, @src usually means
+#                              protocol/src/*, not explorer/src/*.
+#   - Why depth-sort siblings? Closer files (../foo) are more likely
+#                              targets than distant ones (../../bar).
 #
-#   Why prioritize local files?
-#     When you're in protocol/ and type @src, you probably want protocol/src/*
-#     before explorer/src/*. Local-first matches user intent.
-#
-#   Why sort siblings by depth?
-#     Closer files (fewer ../) are more likely targets. ../foo is more relevant
-#     than ../../bar in most navigation patterns.
-#
+# Install: symlinked from dotfiles/claude/file-suggestion.sh by `make`.
 # =============================================================================
-
-set -o errexit
-set -o nounset
-set -o pipefail
 
 # =============================================================================
 # Configuration
 # =============================================================================
-#
-# Source local overrides before setting readonly variables. This allows
-# work-specific configuration without modifying this versioned file.
-#
-# Example ~/.claude/file-suggestion.local.sh:
-#   export CLAUDE_WORKSPACE_MARKER="repos.json"
 
+# Source per-machine overrides before declaring readonly defaults.
 # shellcheck source=/dev/null
-[[ -f ~/.claude/file-suggestion.local.sh ]] && source ~/.claude/file-suggestion.local.sh
+[ -f ~/.claude/file-suggestion.local.sh ] && . ~/.claude/file-suggestion.local.sh
 
 readonly MAX_RESULTS=20
 readonly WORKSPACE_MARKER="${CLAUDE_WORKSPACE_MARKER:-.workspace}"
@@ -84,21 +70,22 @@ readonly WORKSPACE_MARKER="${CLAUDE_WORKSPACE_MARKER:-.workspace}"
 # Workspace Detection
 # =============================================================================
 
-# find_workspace_root - Walk up directory tree looking for marker file
+# find_workspace_root - Locate workspace root by walking up from $PWD
 #
-# Returns the directory containing $WORKSPACE_MARKER, or PWD if not found.
-# The fallback to PWD provides graceful degradation for non-polyrepo projects:
-# single-repo projects still get file suggestions, just without cross-repo reach.
+# Stdout: Path to directory containing $WORKSPACE_MARKER, or $PWD if none
+#         is found.
 #
+# The fallback to $PWD provides graceful degradation: non-polyrepo projects
+# still get file suggestions, just without cross-repo reach.
 find_workspace_root() {
     local dir="$PWD"
-    while [[ "$dir" != "/" ]]; do
-        if [[ -f "$dir/$WORKSPACE_MARKER" ]]; then
+    while [ "$dir" != "/" ]; do
+        if [ -f "$dir/$WORKSPACE_MARKER" ]; then
             printf '%s' "$dir"
             return
         fi
-        dir="${dir%/*}"  # Strip last path component (pure bash, no subshell)
-        dir="${dir:-/}"  # Handle root case: empty string becomes "/"
+        dir="${dir%/*}"
+        dir="${dir:-/}"
     done
     printf '%s' "$PWD"
 }
@@ -107,47 +94,32 @@ find_workspace_root() {
 # File Collection
 # =============================================================================
 
-# collect_all_files - Gather files from workspace and all subrepos
+# collect_all_files - Gather files from workspace and every subrepo
 #
-# Uses git ls-files to get tracked and untracked (but not ignored) files.
-# Subrepos are identified as gitignored directories containing .git/.
-# Each subrepo is queried in parallel for performance.
+# Stdout: One path per line, relative to the workspace root. Output may
+#         interleave from parallel jobs; downstream sorting fixes order.
 #
-# Output: One file path per line, relative to workspace root
+# Workspace files come from `git ls-files --cached --others --exclude-standard`
+# (tracked + untracked-visible; disjoint sets, union is what we want).
 #
+# Subrepos are gitignored directories containing a .git/ entry. Each is
+# queried in a backgrounded subshell. The heredoc keeps the loop in the
+# main shell so variables stay in scope — POSIX has no process substitution.
 collect_all_files() {
-    # Workspace files: tracked + untracked (non-ignored)
-    #
-    # Git flags explained:
-    #   --cached = files in git index (tracked)
-    #   --others = files NOT in git index (untracked)
-    #   --exclude-standard = apply .gitignore rules (only affects --others)
-    #
-    # These are disjoint sets; combining them gives tracked ∪ untracked-visible.
-    # The "|| true" prevents errexit from killing script if not in a git repo.
-    git ls-files --cached --others --exclude-standard 2>/dev/null || true
+    command git ls-files --cached --others --exclude-standard 2>/dev/null \
+        || true
 
-    # Subrepos: gitignored directories that are themselves git repos
-    #
-    # Parallelism pattern:
-    #   - Process substitution "< <(...)" keeps while loop in main shell
-    #   - Background jobs "{ ... } &" parallelize subrepo queries
-    #   - "wait" blocks until all background jobs complete
-    #   - Output may interleave, but we sort later so order doesn't matter
-    #
     local dir
     while IFS= read -r dir; do
-        if [[ -d "$dir/.git" ]]; then
-            git -C "$dir" ls-files --cached --others --exclude-standard 2>/dev/null \
-                | sed "s|^|$dir/|" &
-        fi
-    done < <(
-        # Find gitignored directories (potential subrepos)
-        #   --others --ignored = untracked AND ignored (in .gitignore)
-        #   --directory = list directories themselves, not contents
-        git ls-files --others --ignored --exclude-standard --directory 2>/dev/null \
-            | sed 's|/$||'
-    )
+        [ -d "$dir/.git" ] || continue
+        (
+            command git -C "$dir" ls-files --cached --others --exclude-standard 2>/dev/null \
+                | command sed "s|^|$dir/|"
+        ) &
+    done <<EOF
+$(command git ls-files --others --ignored --exclude-standard --directory 2>/dev/null \
+    | command sed 's|/$||')
+EOF
     wait
 }
 
@@ -155,43 +127,30 @@ collect_all_files() {
 # Path Transformation
 # =============================================================================
 
-# transform_to_relative - Convert workspace-relative paths to PWD-relative
+# transform_to_relative <subdir> - Rewrite paths relative to current dir
 #
-# When working in a subdirectory, file paths need adjustment:
-#   workspace/protocol/src/main.rs → ../protocol/src/main.rs (if in explorer/)
+# $1 is the subdirectory of the workspace where we currently are; empty
+# means we're at the workspace root and paths pass through unchanged.
 #
-# Args:
-#   $1 - Current subdirectory relative to workspace (empty if at root)
+# Stdin:  One workspace-relative path per line.
+# Stdout: One path per line, or "." if a path is the subdir itself.
 #
-# Algorithm:
-#   1. Split both paths into components
-#   2. Find longest common prefix
-#   3. Add "../" for each component we need to go up
-#   4. Append remaining path components
-#
+# Example: subdir=protocol, line=protocol/src/main.rs -> src/main.rs
+#          subdir=protocol, line=explorer/src/lib.rs  -> ../explorer/src/lib.rs
 transform_to_relative() {
     local subdir="$1"
 
-    # At workspace root: paths are already correct
-    if [[ -z "$subdir" ]]; then
+    if [ -z "$subdir" ]; then
         cat
         return
     fi
 
-    # Example: subdir="a/b/c", file="a/b/x/y.rs"
-    #   common prefix = "a/b" (2 components)
-    #   go up 1 level (from c) = "../"
-    #   append "x/y.rs"
-    #   result = "../x/y.rs"
-    #
-    awk -v subdir="$subdir" '
-    BEGIN {
-        subdir_depth = split(subdir, subdir_parts, "/")
-    }
+    command awk -v subdir="$subdir" '
+    BEGIN { subdir_depth = split(subdir, subdir_parts, "/") }
     length > 0 {
         file_depth = split($0, file_parts, "/")
 
-        # Count matching components from the start
+        # Find the longest matching prefix.
         common_depth = 0
         for (i = 1; i <= subdir_depth && i <= file_depth; i++) {
             if (subdir_parts[i] != file_parts[i]) break
@@ -200,13 +159,10 @@ transform_to_relative() {
 
         result = ""
 
-        # Step 1: go up from subdir to common ancestor
-        levels_up = subdir_depth - common_depth
-        for (i = 1; i <= levels_up; i++) {
-            result = result "../"
-        }
+        # Climb out of subdir to the common ancestor.
+        for (i = 1; i <= subdir_depth - common_depth; i++) result = result "../"
 
-        # Step 2: go down from common ancestor to file
+        # Descend from the common ancestor to the file.
         for (i = common_depth + 1; i <= file_depth; i++) {
             if (i > common_depth + 1) result = result "/"
             result = result file_parts[i]
@@ -220,57 +176,49 @@ transform_to_relative() {
 # Filtering and Ranking
 # =============================================================================
 
-# filter_and_prioritize - Match query and sort by relevance
+# filter_and_prioritize <query> - Match query and sort by relevance
 #
-# Ranking strategy:
-#   1. Local files first (no ../ prefix) - you're probably looking here
-#   2. Among siblings, closer files first (fewer path components)
-#   3. Alphabetical tiebreaker for stability
+# $1 is the query string (case-insensitive substring match).
 #
-# Implementation uses a Schwartzian transform:
-#   1. Tag each line with sort keys
-#   2. Sort by keys
-#   3. Strip keys from output
+# Stdin:  One path per line.
+# Stdout: Up to $MAX_RESULTS matching paths, one per line, sorted by relevance.
 #
+# Ranking (Schwartzian transform — tag, sort, untag):
+#   1. Local files first (no `../` prefix).
+#   2. Among siblings, files at lower depth first.
+#   3. Alphabetical tiebreaker.
 filter_and_prioritize() {
     local query="$1"
 
-    awk -v query="$query" '
-    BEGIN {
-        query_lower = tolower(query)
-    }
+    command awk -v query="$query" '
+    BEGIN { ql = tolower(query) }
     {
-        # Case-insensitive substring match
-        if (index(tolower($0), query_lower) == 0) next
-
-        is_sibling = (substr($0, 1, 2) == "..") ? 1 : 0
+        if (index(tolower($0), ql) == 0) next
+        is_sibling = (substr($0, 1, 2) == "..")
         depth = is_sibling ? split($0, _, "/") : 0
-
-        # Output: IS_SIBLING DEPTH PATH (for sorting)
         printf "%d %05d %s\n", is_sibling, depth, $0
     }' \
-    | LC_ALL=C sort -t' ' -k1,1n -k2,2n -k3 \
-    | cut -d' ' -f3- \
-    | head -n "$MAX_RESULTS"
+    | LC_ALL=C command sort -t' ' -k1,1n -k2,2n -k3 \
+    | command cut -d' ' -f3- \
+    | command head -n "$MAX_RESULTS"
 }
 
 # =============================================================================
 # Main
 # =============================================================================
 
+# main - Read query JSON from stdin, emit matching file paths on stdout.
+#
+# Returns: 0 on success, 1 if jq fails to parse the input or `cd` fails.
 main() {
     local query root subdir
+    query=$(command jq -r '.query') || return 1
 
-    # Parse JSON input from Claude Code
-    query="$(jq -r '.query')"
-
-    # Locate workspace and compute position within it
-    root="$(find_workspace_root)"
+    root=$(find_workspace_root)
     subdir="${PWD#"$root"}"
     subdir="${subdir#/}"
 
-    # Run pipeline from workspace root
-    cd "$root"
+    cd "$root" || return 1
     collect_all_files \
         | transform_to_relative "$subdir" \
         | filter_and_prioritize "$query"
