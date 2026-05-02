@@ -1,5 +1,3 @@
-#!/usr/bin/env zsh
-#
 # The ~/.zshenv file is a configuration file for the Z shell (zsh) that is
 # sourced (executed) for all invocations of the shell — login, interactive,
 # non-interactive, and scripts. Put environment variables and PATH setup here

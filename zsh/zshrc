@@ -1,5 +1,3 @@
-#!/usr/bin/env zsh
-#
 # The ~/.zshrc file is sourced for interactive shells only. It configures the
 # appearance and behavior of the shell: prompt, aliases, keybindings, history,
 # and completions.

@@ -1,5 +1,3 @@
-#!/usr/bin/env zsh
-#
 # The ~/.zprofile file is a configuration file for the Z shell (zsh) that is
 # sourced (executed) when you log in to the system. It is used to define
 # settings, aliases, and functions that should be set when you log in to the
