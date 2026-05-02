@@ -11,11 +11,25 @@ make
 ```
 
 **One-liner** (fresh machine):
+
+Debian / Ubuntu / WSL:
+
 ```bash
 sudo apt-get update && sudo apt-get install -y make git && \
 git clone git@github.com:corygabrielsen/dotfiles.git ~/code/dotfiles && \
 cd ~/code/dotfiles && make
 ```
+
+macOS:
+
+```bash
+xcode-select --install 2>/dev/null; \
+git clone git@github.com:corygabrielsen/dotfiles.git ~/code/dotfiles && \
+cd ~/code/dotfiles && make
+```
+
+(`xcode-select --install` ships `make` and `git`. If the install GUI
+pops up, wait for it to finish before continuing.)
 
 ## Commands
 
@@ -56,6 +70,7 @@ dotfiles/
 ## Post-Setup
 
 Set zsh as default shell:
+
 ```bash
 chsh -s $(which zsh)
 ```
