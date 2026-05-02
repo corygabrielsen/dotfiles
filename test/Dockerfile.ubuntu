@@ -1,0 +1,44 @@
+# =============================================================================
+# Dockerfile.ubuntu - Ubuntu test image for dotfiles install
+# =============================================================================
+#
+# Builds an Ubuntu 24.04 image with prereqs + a non-root `test` user + the
+# dotfiles repo copied into $HOME/dotfiles. The image is the substrate;
+# test/test.sh inside the container does the actual validation.
+#
+# Build context must be the dotfiles repo root.
+#
+# Build:  docker build -f test/Dockerfile.ubuntu -t dotfiles-test:ubuntu .
+# Run:    docker run --rm dotfiles-test:ubuntu
+#
+# Driven by: test/run.sh / `make test-container`.
+# =============================================================================
+
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Prereqs:
+#   make, git           required by Makefile + git config bootstrap
+#   ca-certificates     git over https
+#   bash, zsh, dash     shells under test (env loading must work in all three)
+#   age                 secret decryption (forward-compat for Phase 3)
+#   nodejs              one toolchain so PATH detection has a signal; the test
+#                       skips cleanly for tools that aren't installed
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        make git ca-certificates \
+        bash zsh dash \
+        age \
+        nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Non-root user — dotfiles install per-user, never system-wide.
+RUN useradd --create-home --shell /bin/zsh test
+USER test
+WORKDIR /home/test
+
+# Copy dotfiles repo (build context = repo root).
+COPY --chown=test:test . /home/test/dotfiles
+
+ENTRYPOINT ["/bin/sh", "-c"]
+CMD ["/home/test/dotfiles/test/test.sh"]

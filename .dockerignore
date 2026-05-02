@@ -1,0 +1,23 @@
+# Keep this file in sync with .gitignore. Docker COPY does NOT honor
+# .gitignore — it only honors .dockerignore — so anything ignored by git
+# but present in the working tree would otherwise be COPYd into the image.
+# Critical for .claude/ which can hold secrets (.credentials.json).
+
+# Mirrors .gitignore (IDE cruft, OS cruft, build artifacts):
+.claude/
+.idea/
+.vscode/
+*.swp
+*.pyc
+.DS_Store
+vim/.netrwhist
+.tint
+
+# Docker-specific:
+.git
+.gitignore
+test/Dockerfile.*
+
+# Local cruft:
+*.log
+tmp/

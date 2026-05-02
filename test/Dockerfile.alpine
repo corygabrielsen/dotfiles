@@ -1,0 +1,38 @@
+# =============================================================================
+# Dockerfile.alpine - Alpine test image for dotfiles install
+# =============================================================================
+#
+# Same shape as Dockerfile.ubuntu, but on Alpine. Catches musl-libc and
+# busybox-utility differences. Alpine's /bin/sh is BusyBox ash, which
+# approximates dash but is not byte-identical; Phase 3 of test.sh runs a
+# real `dash -n` parse-check for the precise guarantee.
+#
+# Build:  docker build -f test/Dockerfile.alpine -t dotfiles-test:alpine .
+# Run:    docker run --rm dotfiles-test:alpine
+#
+# Driven by: test/run.sh / `make test-container`.
+# =============================================================================
+
+FROM alpine:3.20
+
+# Prereqs:
+#   make, git           required by Makefile
+#   ca-certificates     git over https
+#   bash, zsh, dash     shells under test
+#   age                 secret decryption (forward-compat)
+#   nodejs              one toolchain so PATH detection has a signal
+RUN apk add --no-cache \
+        make git ca-certificates \
+        bash zsh dash \
+        age \
+        nodejs
+
+# BusyBox provides adduser; no need for the heavier `shadow` package.
+RUN adduser -D -s /bin/zsh test
+USER test
+WORKDIR /home/test
+
+COPY --chown=test:test . /home/test/dotfiles
+
+ENTRYPOINT ["/bin/sh", "-c"]
+CMD ["/home/test/dotfiles/test/test.sh"]

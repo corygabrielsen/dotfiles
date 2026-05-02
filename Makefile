@@ -205,6 +205,17 @@ doctor-git-config:
 	fi
 
 ###############################################################################
+# CONTAINER TESTS
+###############################################################################
+#
+# Build and run the dotfiles install in disposable containers across
+# Ubuntu, Debian, and Alpine. See test/run.sh.
+
+.PHONY: test-container
+test-container:
+	@sh test/run.sh
+
+###############################################################################
 # HELP
 ###############################################################################
 
@@ -217,4 +228,5 @@ help:
 	@echo "  require          Validate environment (read-only, fail-fast)"
 	@echo "  doctor           Diagnose and troubleshoot issues"
 	@echo "  install-symlinks Create symlinks for dotfiles"
+	@echo "  test-container   Build + run dotfiles tests in containers"
 	@echo "  help             Show this help"

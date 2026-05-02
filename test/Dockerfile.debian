@@ -1,0 +1,33 @@
+# =============================================================================
+# Dockerfile.debian - Debian test image for dotfiles install
+# =============================================================================
+#
+# Same shape as Dockerfile.ubuntu, but on Debian bookworm. Catches glibc and
+# package-version differences from Ubuntu without changing test logic.
+#
+# Build:  docker build -f test/Dockerfile.debian -t dotfiles-test:debian .
+# Run:    docker run --rm dotfiles-test:debian
+#
+# Driven by: test/run.sh / `make test-container`.
+# =============================================================================
+
+FROM debian:bookworm-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Prereqs (see Dockerfile.ubuntu for rationale per package).
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        make git ca-certificates \
+        bash zsh dash \
+        age \
+        nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd --create-home --shell /bin/zsh test
+USER test
+WORKDIR /home/test
+
+COPY --chown=test:test . /home/test/dotfiles
+
+ENTRYPOINT ["/bin/sh", "-c"]
+CMD ["/home/test/dotfiles/test/test.sh"]

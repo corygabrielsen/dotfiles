@@ -1,0 +1,51 @@
+# shellcheck shell=sh
+# =============================================================================
+# .profile - Canonical login env, sourced by every shell and every script
+# =============================================================================
+#
+# No shebang: this file is never executed, only sourced. Industry
+# convention (Debian Policy, every /etc/profile.d/ script, mathiasbynens,
+# holman, paulirish) is to omit shebangs from sourced-only files. The
+# `# shellcheck shell=sh` directive above tells shellcheck which dialect
+# to lint against, replacing the shebang's editor-hint role.
+#
+# This file is the single source of truth for shell-agnostic environment.
+# It loops through ~/.profile.d/*.sh and sources each in lexical order
+# (00-, 10-, 20-, etc.). Each drop-in owns one concern (locale, PATH,
+# toolchain). Adding a new tool tomorrow is a new file, not an edit here.
+#
+# Mirrors the /etc/profile.d/ pattern used across Linux distributions, sudo,
+# cron, systemd, apt, and many others — drop-in directories compose without
+# conflict.
+#
+# Activation:
+#   - Bash auto-sources this file as ~/.profile for login shells (POSIX
+#     standard fallback when ~/.bash_profile and ~/.bash_login are absent).
+#   - Other shells source it explicitly with `. ~/.profile` once they're
+#     wired up to do so. Today nothing else sources it; future commits
+#     will slim ~/.zshenv and ~/.claude-env.sh down to a single
+#     `. ~/.profile` plus shell-specific overrides.
+#
+# Style:
+#   POSIX-only. The contents of ~/.profile.d/*.sh must parse under dash. Use
+#   [ ] not [[ ]], $(uname) not $OSTYPE, case not regex.
+#
+# Symlinked to ~/.profile by `make` from dotfiles/bash/profile.
+# =============================================================================
+
+#
+# Iteration uses `ls` + word-splitting (rather than a shell glob) because
+# zsh's default NOMATCH behavior treats an unmatched glob as a fatal error,
+# which would break this file when sourced from .zshenv before profile.d/
+# has any files. `ls` always succeeds (or fails benignly into an empty
+# command sub when the dir is missing), so the loop is correct on bash,
+# dash, ash, and zsh alike.
+if [ -d "$HOME/.profile.d" ]; then
+    # shellcheck disable=SC2045  # ls iteration is the zsh-safe choice; see comment above
+    for f in $(LC_ALL=C ls "$HOME/.profile.d" 2>/dev/null); do
+        case "$f" in *.sh) ;; *) continue ;; esac
+        # shellcheck disable=SC1090  # dynamic source path is the whole point
+        . "$HOME/.profile.d/$f"
+    done
+    unset f
+fi
