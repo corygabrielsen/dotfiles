@@ -1,0 +1,16 @@
+# shellcheck shell=sh
+# =============================================================================
+# 30-build-flags.sh - Parallel build defaults
+# =============================================================================
+#
+# MAKEFLAGS=-jN is honored by make and many tools (cargo build scripts,
+# autotools configure pipelines). nproc on Linux, sysctl on macOS.
+# =============================================================================
+
+if command -v nproc >/dev/null 2>&1; then
+    MAKEFLAGS="-j$(nproc)"
+elif [ "$(uname)" = "Darwin" ]; then
+    MAKEFLAGS="-j$(sysctl -n hw.ncpu)"
+fi
+
+[ -n "${MAKEFLAGS:-}" ] && export MAKEFLAGS

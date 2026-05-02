@@ -42,6 +42,7 @@ SYMLINKS := \
 	gitconfig:git/gitconfig \
 	git-template:git/git-template \
 	profile:bash/profile \
+	profile.d:profile.d \
 	tmux.conf:tmux/tmux.conf \
 	vim:vim/vim \
 	vimrc:vim/vimrc \
