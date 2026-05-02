@@ -32,7 +32,7 @@ export SAVEHIST=15000 # unique events guaranteed
 # Check if running under an AI agent
 is_ai_agent() {
     [[ -n "$CLAUDECODE" ]] || \
-    [[ -n "$CODEX_MANAGED_BY_NPM" ]] || \
+    [[ -n "$CODEX_THREAD_ID" ]] || \
     [[ -n "$CURSOR_AGENT" ]] || \
     [[ -n "$GEMINI_CLI" ]]
 }
@@ -561,7 +561,7 @@ srcdump() {
 #
 # Detected automatically via environment variables:
 #   CLAUDECODE=1           - Set by Claude Code
-#   CODEX_MANAGED_BY_NPM=1 - Set by OpenAI Codex
+#   CODEX_THREAD_ID        - Set by OpenAI Codex (per-tool-call subprocess)
 #   CURSOR_AGENT=1         - Set by Cursor
 #   GEMINI_CLI=1           - Set by Google Gemini CLI
 #
@@ -605,7 +605,7 @@ if is_ai_agent; then
     # Separate history file for each agent
     if [[ -n "$CLAUDECODE" ]]; then
         export HISTFILE=~/.zsh_history_claude
-    elif [[ -n "$CODEX_MANAGED_BY_NPM" ]]; then
+    elif [[ -n "$CODEX_THREAD_ID" ]]; then
         export HISTFILE=~/.zsh_history_codex
     elif [[ -n "$CURSOR_AGENT" ]]; then
         export HISTFILE=~/.zsh_history_cursor
